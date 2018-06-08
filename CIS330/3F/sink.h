@@ -22,7 +22,7 @@ class Sink {
     Image * GetOutput2();
 
     // sinkName
-    virtual const char * sinkName() { };
+    virtual const char * SinkName() { };
 };
 
 #endif
