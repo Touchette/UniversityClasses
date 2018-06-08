@@ -1,0 +1,95 @@
+Stalls due to hazards (conflicts in the processor)
+
+forwarding (fundamental idea about the processor architecture)
+
+"checking back to see if anything is messing with the value I want,
+if so, I want to grab the most recent one" - processor
+
+this doesn't work in the case where we don't have the data we need in the
+processor
+
+predicting the PC start fetch of new instruction after current one has
+completed the fetch stage, but not enough time to reliably determine next
+instruction
+
+# of stalls due to hazards
+
+0: data w/ forwarding except load/use
+   correct PC predictions
+
+1: load/use
+
+2: incorrect PC prediction
+
+3: data without forwarding
+
+-------------------------------------
+
+implementing loop framework is hard
+need outer loop and inner loop
+
+
+bubblesort:
+	pushl %ebp
+	movl %esp, %ebp
+	pushl %esi
+
+
+.L3:
+	testl %esi, %esi
+
+
+
+
+
+
+void main() {
+	int[4] array = {1, 2, 3, 4};
+	sum(array, 4);
+}
+
+addl $4, %eax
+where eax is a pointer to the beginning of the array,
+we walk through the array number by number adding them up.
+that's what the addl $4 is doing
+
+int i, j;
+for(i=0; i<N-1; i++) {
+	for (j=0; i<N-i-1; j++) { // do this comparison, if it fails, go to the next // instruction
+	if (*(array + j) >  *(array + j + 1))
+		// swap
+	}
+}
+
+Take bubble sort from first projects, compile it into assembly
+and take a look at the IA32 which is similar to the y86
+
+Take the code from the sumR	
+
+================
+Hardcoded array
+----------------
+looks like this, get it from the sum function
+================
+
+array: .align
+       .long x0001
+       .long x0002
+
+===========
+Framework
+===========
+
+main:
+
+** Sort: goes here
+
+hard | outer:
+     |
+part | inner:
+
+skipswap:
+
+swap:
+
+// Stack: this is a given

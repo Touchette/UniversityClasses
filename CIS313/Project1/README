@@ -1,0 +1,5 @@
+Usage
+
+Problem 1: python3 stack.py problem1.input > myproblem1.output && diff problem1.output myproblem1.output
+
+Problem 2: python3 queue.py problem1.input > myproblem1.output && diff problem2.output myproblem2.output

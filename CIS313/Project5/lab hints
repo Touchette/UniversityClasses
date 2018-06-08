@@ -1,0 +1,65 @@
+In a sorted array, we can access the nth smallest element by doing A[n-1], for example we could do the 14th smallest element via A[13]. These operations are O(1)
+For a tree, we could do something similar:
+	 1) T[13] = ? and an inorder traversal will produce T[13] giving the 14th smallest item. O(n)
+	 2) min + find right sucessor O(n)
+	 3) A log(n) solution is called an order statistic tree
+
+The numbers in this tree define the subtree sizes
+
+	 100
+	/   \
+   50    49
+  /  \
+ 5   44
+
+ Because we are looking for the 14th smallest element, we first go to the left because those contian the 50 smallest elements.
+ The, we would be looking in the right subtree because it takes the 44 smallest elements now, but we are no longer looking for the 14th element. Now, because we have discarded the 5 smallest ones along with the node above it, we are looking for the 14-6 = 8th smallest element in that subtree.
+
+
+Pseudocode:
+-----------
+
+ order_stat(node, key):
+ if i < node.left.size:
+ 	order_stat(node.left, i)
+
+if i > node.left.size:
+	order_stat(node.right, i)
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+class Node(key, value, ...):
+	key:
+	color:
+	left:
+	right:
+	parent:
+	value:
+
+class Map():
+	__init__(self):
+		self.rbt = RedBlackTree()
+
+	insert(self, key, value):
+		# check for duplicates as well, modify underlying structure
+		self.rbt.insert(key, value)
+
+	reassign(key, value):
+		try:
+			node = self.rbt.search(key)
+		catch:
+			didn't find
+
+		node.value = value
+
+	remove(key):
+		self.rbt.remove(key)
+
+	lookup(key):
+		return self.rbt.search(key) ? True : False
+
+	fetch(key):
+		try:
+			return self.rbt.search(key)
+		catch:
+			didn't find

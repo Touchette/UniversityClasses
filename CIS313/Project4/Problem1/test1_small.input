@@ -1,0 +1,32 @@
+31
+insert 40
+insert 5
+insert 4
+insert -5
+insert 25
+insert 15
+insert 33
+insert 55
+bpv
+remove 15
+bpv
+remove 25
+bpv
+remove 40
+bpv
+remove 5
+bpv
+remove 4
+bpv
+remove -5
+bpv
+remove 25
+bpv
+remove 15
+bpv
+remove 33
+bpv
+remove 55
+bpv
+insert 7
+bpv
