@@ -9,7 +9,7 @@ void Filter::Update() {
     // From Hank's live code session, modified to not use
     // C++ i/o as I don't like it very much. Also different
     // names to match mine
-    char *msg = (char *)(malloc(sizeof(char) * 256));
+    char msg[256];
 
     if (GetNumberOfInputs() >= 1 && input1 != NULL) {
         // Changed to be sprintf to put it inside of msg
@@ -37,63 +37,51 @@ void Filter::Update() {
 }
 
 void Filter::ThrowException() {
-    char *msg = (char *)(malloc(sizeof(char) * 256));
+    char msg[256];
 
     sprintf(msg, "No input1 for filter!");
     DataFlowException e(FilterName(), msg);
     throw e;
-
-    free(msg);
 }
 
 void Filter::ThrowException2() {
-    char *msg = (char *)(malloc(sizeof(char) * 256));
+    char msg[256];
 
     sprintf(msg, "No input2 for filter");
     DataFlowException e(FilterName(), msg);
     throw e;
-
-    free(msg);
 }
 
 void Filter::ThrowHeightException() {
-    char *msg = (char *)(malloc(sizeof(char) * 256));
+    char msg[256];
 
     sprintf(msg, "Heights don't match!");
     DataFlowException e(FilterName(), msg);
     throw e;    
-
-    free(msg);
 }
 
 void Filter::ThrowWidthException() {
-    char *msg = (char *)(malloc(sizeof(char) * 256));
+    char msg[256];
 
     sprintf(msg, "Widths don't match!");
     DataFlowException e(FilterName(), msg);
     throw e;
-
-    free(msg);
 }
 
 void Filter::ThrowSizeException() {
-    char *msg = (char *)(malloc(sizeof(char) * 256));
+    char msg[256];
 
     sprintf(msg, "Sizes don't match!");
     DataFlowException e(FilterName(), msg);
     throw e;
-
-    free(msg);
 }
 
 void Filter::ThrowFactorException() {
-    char *msg = (char *)(malloc(sizeof(char) * 256));
+    char msg[256];
 
     sprintf(msg, "Invalid factor for blender!");
     DataFlowException e(FilterName(), msg);
     throw e;
-
-    free(msg);
 }
 
 void Shrinker::Execute() {

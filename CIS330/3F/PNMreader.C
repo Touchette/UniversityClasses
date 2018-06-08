@@ -32,7 +32,7 @@ void PNMreader::Execute() {
     }
 
     // These 3 lines given by Hank
-    char magicNum[128];
+    char *magicNum = (char *)(malloc(sizeof(char) * 256));
     int width, height, maxval;
     // From the YouTube lecture, this is the start of a PNM P6 file
     fscanf(f_in, "%s\n%d %d\n%d\n", magicNum, &width, &height, &maxval);
@@ -57,4 +57,5 @@ void PNMreader::Execute() {
     // Close file, can free temp here because we don't need it anymore
     fclose(f_in);
     free(temp);
+    free(magicNum);
 }

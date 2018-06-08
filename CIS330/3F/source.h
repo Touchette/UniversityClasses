@@ -9,8 +9,9 @@ class Source {
     virtual void Execute() = 0;
 
   public:
-   // Constructors
-   Source();
+  	// Constructors
+  	Source();
+    ~Source();
 
     // Getters
     Image * GetOutput();

@@ -9,7 +9,6 @@ FILE *Logger::logger = fopen("log", "w");
 DataFlowException::DataFlowException(const char *type, const char *error) {
 	sprintf(msg, "%s: Exception thrown! %s", type, error);
 	Logger::LogEvent(msg);
-	
 }
 
 void Logger::LogEvent(const char *event) {

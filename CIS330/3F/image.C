@@ -31,6 +31,8 @@ Image::Image(Image &image) {
 
 Image::~Image() {
     free(array);
+    array  = NULL;
+    source = NULL;
 }
 
 void Image::SetSize(int he, int wi) {
@@ -39,8 +41,14 @@ void Image::SetSize(int he, int wi) {
 }
 
 void Image::SetData(unsigned char *arr) {
+    int size = 3 * height * width;
+
     if (array == NULL) {
-        array = (unsigned char*)(malloc(3 * height * width));
+        array = (unsigned char*)(malloc(size));
+    }
+    else {
+        free(array);
+        array = (unsigned char*)(malloc(size));
     }
 
     memcpy(array, arr, 3 * height * width);
