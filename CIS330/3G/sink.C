@@ -1,5 +1,5 @@
-#include <sink.h>
 #include <image.h>
+#include <sink.h>
 
 Sink::Sink() {
     input1 = NULL;

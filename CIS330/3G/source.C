@@ -1,8 +1,8 @@
-#include <source.h>
-#include <image.h>
 #include <logging.h>
+#include <source.h>
 #include <stdlib.h>
 #include <string.h>
+#include <image.h>
 
 Source::Source() {
     output->SetSource(this);

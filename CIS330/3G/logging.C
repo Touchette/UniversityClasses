@@ -1,7 +1,7 @@
-#include <stdio.h>
 #include <logging.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 // Logger file
 FILE *Logger::logger = fopen("log", "w");

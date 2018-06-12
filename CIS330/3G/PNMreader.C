@@ -1,8 +1,9 @@
 #include <PNMreader.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <image.h>
 #include <string.h>
+#include <stdio.h>
+#include <image.h>
+
 
 PNMreader::PNMreader(char *fn) {
     filename = (char *)(malloc(strlen(fn) + 1));

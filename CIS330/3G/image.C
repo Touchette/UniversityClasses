@@ -1,9 +1,9 @@
-#include <stdio.h>
+#include <logging.h>
 #include <stdlib.h>
 #include <string.h>
-#include <image.h>
 #include <source.h>
-#include <logging.h>
+#include <stdio.h>
+#include <image.h>
 
 Image::Image() {
     height = 0;

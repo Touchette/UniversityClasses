@@ -40,7 +40,7 @@ class DoubleInputFilter : public Filter {
 class Shrinker : public SingleInputFilter {
   public:
     // Constructors
-  	Shrinker() { };
+    Shrinker() { };
 
     // Setters
     void SetInput(Image *img) { Sink::SetInput(img); };
@@ -120,7 +120,7 @@ class Blur : public SingleInputFilter {
 class LRCombine : public DoubleInputFilter { 
   public:
     // Constructors
-  	LRCombine() { };
+    LRCombine() { };
 
     // Setters
     void SetInput(Image *img) { Sink::SetInput(img); };
@@ -137,14 +137,14 @@ class LRCombine : public DoubleInputFilter {
 class TBCombine : public DoubleInputFilter {
   public:
     //Constructors
-  	TBCombine() { };
+    TBCombine() { };
 
     // Setters
     void SetInput(Image *img) { Sink::SetInput(img); };
     void SetInput2(Image *img) { Sink::SetInput2(img); };
 
     // Getters
-  	Image * GetOutput() { return Source::GetOutput(); };
+    Image * GetOutput() { return Source::GetOutput(); };
 
     // FilterName & Execute
     virtual const char * FilterName() { return "TBCombine"; };
@@ -153,12 +153,12 @@ class TBCombine : public DoubleInputFilter {
 
 class Blender : public DoubleInputFilter { 
   private:
-  	double factor;
+    double factor;
 
   public:
     // Constructors
     Blender() { };
-	Blender(double fctr) : factor(fctr) { };
+    Blender(double fctr) : factor(fctr) { };
 
     // Setters
     void SetInput(Image *img) { Sink::SetInput(img); };

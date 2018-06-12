@@ -1,6 +1,6 @@
 #include <PNMwriter.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <image.h>
 
 PNMwriter::PNMwriter() { }

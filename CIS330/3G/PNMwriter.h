@@ -1,8 +1,8 @@
 #ifndef PNMWRITER_h
 #define PNMWRITER_h
 
-#include <sink.h>
 #include <image.h>
+#include <sink.h>
 
 class PNMwriter : public Sink {
   public:
