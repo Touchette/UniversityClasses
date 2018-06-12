@@ -13,7 +13,7 @@ class PNMwriter : public Sink {
     // Getters
     Image * GetOutput() { return Sink::GetOutput(); };
 
-    // Write * SinkName
+    // Write & SinkName
     void Write(char *filename);
     const char * SinkName() { return "PNMwriter"; };
 };
