@@ -96,7 +96,7 @@ void Filter::ThrowFactorException() {
 }
 
 void Shrinker::Execute() {
-	// Exception checking
+    // Exception checking
     if (Sink::GetOutput() == NULL) {
         ThrowException();
     }
@@ -143,7 +143,7 @@ void Shrinker::Execute() {
 }
 
 void Mirror::Execute() {
-	// Exception checking
+    // Exception checking
     if (Sink::GetOutput() == NULL) {
         ThrowException();
     }
@@ -173,7 +173,7 @@ void Mirror::Execute() {
     for (i=0; i<height; ++i) {
         var = 0;
         for (j=width-1; j>=0; --j) {
-        	// Indexing
+            // Indexing
             inIndex  = 3 * ((width * i) + j);
             outIndex = 3 * ((width * i) + var);
 
@@ -192,7 +192,7 @@ void Mirror::Execute() {
 }
 
 void Rotate::Execute() {
-	// Exception checking
+    // Exception checking
     if (Sink::GetOutput() == NULL) {
         ThrowException();
     }
@@ -221,7 +221,7 @@ void Rotate::Execute() {
 
     for (i=0; i<height; ++i) {
         for (j=0; j<width; ++j) {
-        	// Indexing
+            // Indexing
             inIndex  = 3 * ((width * i) + j);
             outIndex = 3 * ((height * (j + 1)) - (i + 1));
 
@@ -238,7 +238,7 @@ void Rotate::Execute() {
 }
 
 void Grayscale::Execute() {
-	// Exception checking
+    // Exception checking
     if (Sink::GetOutput() == NULL) {
         ThrowException();
     }
@@ -266,7 +266,7 @@ void Grayscale::Execute() {
 
     for (i=0; i<height; ++i) {
         for (j=0; j<width; ++j) {
-        	// Indexing
+            // Indexing
             index = 3 * ((width * i) + j);
 
             unsigned char gray = data[index] / 5 + data[index + 1] / 2 + data[index + 2] / 4;
@@ -284,7 +284,7 @@ void Grayscale::Execute() {
 }
 
 void Blur::Execute() { 
-	// Exception checking
+    // Exception checking
     if (Sink::GetOutput() == NULL) {
         ThrowException();
     }
@@ -314,17 +314,17 @@ void Blur::Execute() {
 
     for (i=0; i<height; ++i) {
         for (j=0; j<width; ++j) {
-        	// Indexing
+            // Indexing
             index = 3 * ((width * i) + j);
 
             if ((i == 0) or i == (height - 1) or (j == 0) or (j == width - 1)) {
-            	// Check if the loop is on one of the outer border pixels
+                // Check if the loop is on one of the outer border pixels
                 temp[index]     = data[index];
                 temp[index + 1] = data[index + 1];
                 temp[index + 2] = data[index + 2];
             }
             else {
-            	// The legit ugliest code you will ever see in your entire life
+                // The legit ugliest code you will ever see in your entire life
                 left   = index - 3;
                 right  = index + 3;
                 up     = index - (width * 3);
@@ -352,7 +352,7 @@ void Blur::Execute() {
 }
 
 void LRCombine::Execute() {
-	// Exception checking
+    // Exception checking
     if (Sink::GetOutput() == NULL) {
         ThrowException();
     }
@@ -390,7 +390,7 @@ void LRCombine::Execute() {
 
     for (int i=0; i<widthOne; ++i) {
         for(int j=0; j<outputHeight; ++j) {
-        	// Indexing
+            // Indexing
             inIndex  = 3 * ((widthOne * j) + i);
             outIndex = 3 * ((outputWidth * j) + i);
 
@@ -406,7 +406,7 @@ void LRCombine::Execute() {
 
     for (int u=0; u<widthTwo; ++u) {
         for(int v=0; v<outputHeight; ++v) {
-        	// Indexing
+            // Indexing
             inIndex  = 3 * ((widthTwo * v) + u);
             outIndex = 3 * ((outputWidth * v)+ widthOne + u);
 
@@ -423,7 +423,7 @@ void LRCombine::Execute() {
 }
 
 void TBCombine::Execute() {
-	// Exception checking
+    // Exception checking
     if (Sink::GetOutput() == NULL) {
         ThrowException();
     }
@@ -461,7 +461,7 @@ void TBCombine::Execute() {
 
     for (int i=0; i<outputWidth; ++i) {
         for(int j=0; j<heightOne; ++j) {
-        	// Indexing
+            // Indexing
             inIndex  = 3 * (widthOne * j + i);
             outIndex = 3 * (outputWidth * j + i);
 
@@ -477,7 +477,7 @@ void TBCombine::Execute() {
 
     for (int u=0; u<outputWidth; ++u) {
         for(int v=0; v<heightTwo; ++v) {
-        	// Indexing
+            // Indexing
             inIndex  = 3 * ((widthTwo * v)+ u);
             outIndex = 3 * ((outputWidth * (v + heightOne)) + u);
 
@@ -494,7 +494,7 @@ void TBCombine::Execute() {
 }
 
 void Blender::Execute() {
-	// Exception checking
+    // Exception checking
     if (Sink::GetOutput() == NULL) {
         ThrowException();
     }
@@ -536,7 +536,7 @@ void Blender::Execute() {
 
     for (int i=0; i<outputWidth; ++i) {
         for(int j=0; j<outputHeight; ++j) {
-        	// Indexing
+            // Indexing
             index  = 3 * ((outputWidth * j) + i);
 
             temp[index]     = data1[index]     * factor + data2[index]     * (1 - factor);
@@ -552,7 +552,7 @@ void Blender::Execute() {
 }
 
 void Subtract::Execute() {
-	// Exception checking
+    // Exception checking
     if (Sink::GetOutput() == NULL) {
         ThrowException();
     }
@@ -590,7 +590,7 @@ void Subtract::Execute() {
 
     for (i=0; i<heightOne; ++i) {
         for(j=0; j<widthOne; ++j) {
-        	// Indexing
+            // Indexing
             index  = 3 * ((widthOne * i) + j);
             index1 = index + 1;
             index2 = index + 2;
@@ -616,7 +616,7 @@ Color::Color(int wi, int he, unsigned char r, unsigned char g, unsigned char b) 
 }
 
 void Color::Execute() {
-	// Getting inputs & outputs
+    // Getting inputs & outputs
     Image *output = Source::GetOutput();
 
     // Size
@@ -632,7 +632,7 @@ void Color::Execute() {
 
     for (i=0; i<height; ++i) {
         for (j=0; j<width; ++j) {
-        	// Indexing
+            // Indexing
             index = 3 * ((i * width) + j);
 
             temp[index]     = red;
