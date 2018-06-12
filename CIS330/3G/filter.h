@@ -136,7 +136,7 @@ class LRCombine : public DoubleInputFilter {
 
 class TBCombine : public DoubleInputFilter {
   public:
-    //Constructors
+    // Constructors
     TBCombine() { };
 
     // Setters
