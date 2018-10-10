@@ -12,6 +12,7 @@ uploaded follows.
 * Spring 2018 - C/C++ & Unix - Professor Hank Childs (best professor?)
 ***
 * Fall 2018 - Software Methodology - Professor Joseph Sventek
-* Fall 2018 - Principles of Programming Languages
+* Fall 2018 - Principles of Programming Languages - Professor Zena Ariola
+* Fall 2018 - Compiler Construction - Professor Michal Young
 # 2019
 * Let's see!
