@@ -1,0 +1,3 @@
+/home/natalie/Documents/Repos/CIS441/Proj1C/Build/CMakeFiles/rebuild_cache.dir
+/home/natalie/Documents/Repos/CIS441/Proj1C/Build/CMakeFiles/project1C.dir
+/home/natalie/Documents/Repos/CIS441/Proj1C/Build/CMakeFiles/edit_cache.dir
