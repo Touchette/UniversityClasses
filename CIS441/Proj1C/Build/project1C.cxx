@@ -11,6 +11,7 @@
 #include <vtkFloatArray.h>
 #include <vtkCellArray.h>
 
+// Definitions of triangle types
 #define goingDown 0
 #define goingUp 1
 #define arbitrary 2
@@ -136,7 +137,7 @@ double Triangle::findB(int side) {
 	double *X = this->X;
 	double *Y = this->Y;
 
-	// calculate B value
+	// Calculate B value
 	// 1 is left side, 0 is right side
 	if (side) {
 		double leftSlope = this->findSlope(1);
@@ -167,7 +168,7 @@ class Screen {
 };
 
 void Screen::ImageColor(int row, int column, unsigned char color[3]) {
-	// make sure to not go outside the bounds of the image when coloring
+	// Make sure to not go outside the bounds of the image when coloring
 	if (row < 0 || row >= this->height) {
 		return;
 	}
@@ -175,7 +176,7 @@ void Screen::ImageColor(int row, int column, unsigned char color[3]) {
 		return;
 	}
 
-	// write the three colors to the buffer
+	// Write the three colors to the buffer
 	int index = 3 * ((row * this->width) + column);
 	this->buffer[index+0] = color[0];
 	this->buffer[index+1] = color[1];
@@ -193,13 +194,13 @@ void Screen::ImageColor(int row, int column, unsigned char color[3]) {
 // Triangle-related methods
 // ========================
 void rasterizeTriangle(Triangle triangle, Screen screen) {
-	// get the vertices sorted before finding them
+	// Get the vertices sorted before finding them
 	triangle.findVertices();
 	int vertex1 = triangle.vertex1;
 	int vertex2 = triangle.vertex2;
 	int vertex3 = triangle.vertex3;
 
-	// redeclare the X and Y arrays to shorten lines
+	// Redeclare the X and Y arrays to shorten lines
 	double *X = triangle.X;
 	double *Y = triangle.Y;
 
@@ -221,11 +222,11 @@ void rasterizeTriangle(Triangle triangle, Screen screen) {
 	}
 
 
-	// get the left slope and right slope
+	// Get the left slope and right slope
 	double leftSlope  = triangle.findSlope(1);
 	double rightSlope = triangle.findSlope(0);
 
-	// get the left B value and the right B value (needed for y=mx+b)
+	// Get the left B value and the right B value (needed for y=mx+b)
 	double leftB  = triangle.findB(1);
 	double rightB = triangle.findB(0);
 
@@ -235,7 +236,7 @@ void rasterizeTriangle(Triangle triangle, Screen screen) {
 		double leftEnd  = (r - leftB) / leftSlope;
 		double rightEnd = (r - rightB) / rightSlope;
 
-		// handle right angles
+		// Handle right angles
 		if (X[vertex1] == X[vertex3]) {
 			leftEnd = X[vertex1]; // left hand side right angle
 		}
@@ -247,24 +248,22 @@ void rasterizeTriangle(Triangle triangle, Screen screen) {
 		int ceilLeft   = (int) ceil_441(leftEnd);
 		int floorRight = (int) floor_441(rightEnd);
 		for (c = ceilLeft; c <= floorRight; ++c) {
+			// Color the pixels
 			screen.ImageColor(r, c, triangle.color);
 		}
 	}
-	// cerr << "Triangle Type: " << TriangleTypes[triangle.triangleType] << endl;
-	// cerr << "Vertex 1: (" << triangle.X[vertex1] << ", " << triangle.Y[vertex1] << ")\n";
-	// cerr << "Vertex 2: (" << triangle.X[vertex2] << ", " << triangle.Y[vertex2] << ")\n";
-	// cerr << "Vertex 3: (" << triangle.X[vertex3] << ", " << triangle.Y[vertex3] << ")\n";
 }
 
 void drawTriangle(Triangle triangle, Screen screen) {
-	// sort the vertices before doing anything
+	// Sort the vertices before doing anything
 	triangle.findVertices();
 
+	// Forward declarations
 	double slope, b, x;
 	Triangle top, bottom;
 	int vertex1, vertex2, vertex3;
 
-	// redeclare vertices for easy access
+	// Redeclare vertices for easy access
 	vertex1 = triangle.vertex1;
 	vertex2 = triangle.vertex2;
 	vertex3 = triangle.vertex3;
@@ -304,6 +303,8 @@ void drawTriangle(Triangle triangle, Screen screen) {
 			rasterizeTriangle(bottom, screen);
 			break;
 		default:
+			// If it's just a normal going up or going down triangle, rasterize
+			// it normally
 			rasterizeTriangle(triangle, screen);
 			break;
 	}
@@ -364,7 +365,7 @@ int main(int argc, char *argv[]) {
 	vtkImageData *image   = NewImage(1786, 1344);
 	unsigned char *buffer = (unsigned char *) image->GetScalarPointer(0,0,0);
 
-	// black out the buffer
+	// Black out the buffer
 	int npixels = 1786*1344;
 	for (int i = 0 ; i < npixels*3 ; i++) {
 	   buffer[i] = 0;
@@ -377,14 +378,7 @@ int main(int argc, char *argv[]) {
 	screen.width = 1786;
 	screen.height = 1344;
 
-	Triangle test = Triangle();
-	test.X[0] = 500; test.Y[0] = 500;
-	test.X[1] = 550; test.Y[1] = 550;
-	test.X[2] = 600; test.Y[2] = 450;
-	test.color[0] = 255; test.color[1] = 0; test.color[2] = 0;
-
-	// drawTriangle(test, &screen);
-
+	// Draw the triangles!
 	for (auto triangle : triangles) {
 		drawTriangle(triangle, screen);
 	}
