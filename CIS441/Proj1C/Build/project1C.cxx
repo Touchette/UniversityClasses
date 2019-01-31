@@ -354,37 +354,6 @@ std::vector<Triangle> GetTriangles(void) {
     return tris;
 }
 
-std::vector<Triangle> GetTriangles2(void) {
-	std::vector<Triangle> rv(100);
-
-	unsigned char colors[6][3] = { {255,128,0}, {255, 0, 127}, {0,204,204}, 
-								 {76,153,0},  {255, 204, 204}, {204, 204, 0} };
-	for (int i = 0 ; i < 100 ; i++) {
-		int idxI = i%10;
-		int posI = idxI*100;
-		int idxJ = i/10;
-		int posJ = idxJ*100;
-		int firstPt = (i%3);
-		rv[i].X[firstPt] = posI;
-		if (i == 50) {
-		   rv[i].X[firstPt] = -10;
-		}
-		rv[i].Y[firstPt] = posJ+10*(idxJ+1);
-		rv[i].X[(firstPt+1)%3] = posI+99;
-		rv[i].Y[(firstPt+1)%3] = posJ+10*(idxJ+1);
-		rv[i].X[(firstPt+2)%3] = posI+i;
-		rv[i].Y[(firstPt+2)%3] = posJ;
-		if (i == 5) {
-		  rv[i].Y[(firstPt+2)%3] = -50;
-		}
-		rv[i].color[0] = colors[i%6][0];
-		rv[i].color[1] = colors[i%6][1];
-		rv[i].color[2] = colors[i%6][2];
-	}
-
-	return rv;
-}
-
 // +-------------+
 // | *********** |
 // | Main Method |
