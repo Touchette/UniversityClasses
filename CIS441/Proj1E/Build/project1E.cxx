@@ -1,15 +1,16 @@
 #include <iostream>
 #include <algorithm>
-#include <vtkPoints.h>
 #include <vtkDataSet.h>
-#include <vtkPolyData.h>
 #include <vtkImageData.h>
 #include <vtkPNGWriter.h>
 #include <vtkPointData.h>
-#include <vtkCellArray.h>
-#include <vtkFloatArray.h>
+#include <vtkPolyData.h>
 #include <vtkPolyDataReader.h>
+#include <vtkPoints.h>
 #include <vtkUnsignedCharArray.h>
+#include <vtkFloatArray.h>
+#include <vtkCellArray.h>
+#include <vtkDoubleArray.h>
 
 // Definitions of triangle types
 #define goingDown 0
@@ -59,53 +60,52 @@ void WriteImage(vtkImageData *img, const char *filename) {
 
 class Matrix {
   public:
-    double          A[4][4];  // A[i][j] means row i, column j
+	double A[4][4];  // A[i][j] means row i, column j
 
-    void            TransformPoint(const double *ptIn, double *ptOut);
-    static Matrix   ComposeMatrices(const Matrix &, const Matrix &);
-    void            Print(ostream &o);
+	void Print(ostream &o);
+	void TransformPoint(const double *ptIn, double *ptOut);
+	static Matrix ComposeMatrices(const Matrix &, const Matrix &);
 };
 
-void
-Matrix::Print(ostream &o) {
-    for (int i = 0 ; i < 4 ; i++)
-    {
-        char str[256];
-        sprintf(str, "(%.7f %.7f %.7f %.7f)\n", A[i][0], A[i][1], A[i][2], A[i][3]);
-        o << str;
-    }
+void Matrix::Print(ostream &o) {
+	for (int i = 0 ; i < 4 ; i++) {
+		char str[256];
+		sprintf(str, "(%.7f %.7f %.7f %.7f)\n", A[i][0], A[i][1], A[i][2], A[i][3]);
+		o << str;
+	}
 }
 
 Matrix Matrix::ComposeMatrices(const Matrix &M1, const Matrix &M2) {
-    Matrix rv;
-    for (int i = 0 ; i < 4 ; i++)
-        for (int j = 0 ; j < 4 ; j++)
-        {
-            rv.A[i][j] = 0;
-            for (int k = 0 ; k < 4 ; k++)
-                rv.A[i][j] += M1.A[i][k]*M2.A[k][j];
-        }
+	Matrix rv;
+	for (int i = 0 ; i < 4 ; i++) {
+		for (int j = 0 ; j < 4 ; j++) {
+			rv.A[i][j] = 0;
+			for (int k = 0 ; k < 4 ; k++) {
+				rv.A[i][j] += M1.A[i][k]*M2.A[k][j];
+			}
+		}
+	}
 
-    return rv;
+	return rv;
 }
 
 void Matrix::TransformPoint(const double *ptIn, double *ptOut) {
-    ptOut[0] = ptIn[0]*A[0][0]
-             + ptIn[1]*A[1][0]
-             + ptIn[2]*A[2][0]
-             + ptIn[3]*A[3][0];
-    ptOut[1] = ptIn[0]*A[0][1]
-             + ptIn[1]*A[1][1]
-             + ptIn[2]*A[2][1]
-             + ptIn[3]*A[3][1];
-    ptOut[2] = ptIn[0]*A[0][2]
-             + ptIn[1]*A[1][2]
-             + ptIn[2]*A[2][2]
-             + ptIn[3]*A[3][2];
-    ptOut[3] = ptIn[0]*A[0][3]
-             + ptIn[1]*A[1][3]
-             + ptIn[2]*A[2][3]
-             + ptIn[3]*A[3][3];
+	ptOut[0] = ptIn[0]*A[0][0]
+			 + ptIn[1]*A[1][0]
+			 + ptIn[2]*A[2][0]
+			 + ptIn[3]*A[3][0];
+	ptOut[1] = ptIn[0]*A[0][1]
+			 + ptIn[1]*A[1][1]
+			 + ptIn[2]*A[2][1]
+			 + ptIn[3]*A[3][1];
+	ptOut[2] = ptIn[0]*A[0][2]
+			 + ptIn[1]*A[1][2]
+			 + ptIn[2]*A[2][2]
+			 + ptIn[3]*A[3][2];
+	ptOut[3] = ptIn[0]*A[0][3]
+			 + ptIn[1]*A[1][3]
+			 + ptIn[2]*A[2][3]
+			 + ptIn[3]*A[3][3];
 }
 
 // +----------------------------+
@@ -115,57 +115,55 @@ void Matrix::TransformPoint(const double *ptIn, double *ptOut) {
 // +----------------------------+
 
 class Camera {
-  public:
-    double          near, far;
-    double          angle;
-    double          position[3];
-    double          focus[3];
-    double          up[3];
+ public:
+	double near, far;
+	double angle;
+	double position[3];
+	double focus[3];
+	double up[3];
 
-    Matrix          ViewTransform(void) {;};
-    Matrix          CameraTransform(void) {;};
-    Matrix          DeviceTransform(void) {;};
+	Matrix ViewTransform(void) {;};
+	Matrix CameraTransform(void) {;};
+	Matrix DeviceTransform(void) {;};
 };
 
 
 double SineParameterize(int curFrame, int nFrames, int ramp) {
-    int nNonRamp = nFrames-2*ramp;
-    double height = 1./(nNonRamp + 4*ramp/M_PI);
-    if (curFrame < ramp)
-    {
-        double factor = 2*height*ramp/M_PI;
-        double eval = cos(M_PI/2*((double)curFrame)/ramp);
-        return (1.-eval)*factor;
-    }
-    else if (curFrame > nFrames-ramp)
-    {
-        int amount_left = nFrames-curFrame;
-        double factor = 2*height*ramp/M_PI;
-        double eval =cos(M_PI/2*((double)amount_left/ramp));
-        return 1. - (1-eval)*factor;
-    }
-    double amount_in_quad = ((double)curFrame-ramp);
-    double quad_part = amount_in_quad*height;
-    double curve_part = height*(2*ramp)/M_PI;
-    return quad_part+curve_part;
+	int nNonRamp = nFrames-2*ramp;
+	double height = 1./(nNonRamp + 4*ramp/M_PI);
+	if (curFrame < ramp) {
+		double factor = 2*height*ramp/M_PI;
+		double eval = cos(M_PI/2*((double)curFrame)/ramp);
+		return (1.-eval)*factor;
+	}
+	else if (curFrame > nFrames-ramp) {
+		int amount_left = nFrames-curFrame;
+		double factor = 2*height*ramp/M_PI;
+		double eval =cos(M_PI/2*((double)amount_left/ramp));
+		return 1. - (1-eval)*factor;
+	}
+	double amount_in_quad = ((double)curFrame-ramp);
+	double quad_part = amount_in_quad*height;
+	double curve_part = height*(2*ramp)/M_PI;
+	return quad_part+curve_part;
 }
 
 Camera GetCamera(int frame, int nframes) {
-    double t = SineParameterize(frame, nframes, nframes/10);
-    Camera c;
-    c.near = 5;
-    c.far = 200;
-    c.angle = M_PI/6;
-    c.position[0] = 40*sin(2*M_PI*t);
-    c.position[1] = 40*cos(2*M_PI*t);
-    c.position[2] = 40;
-    c.focus[0] = 0;
-    c.focus[1] = 0;
-    c.focus[2] = 0;
-    c.up[0] = 0;
-    c.up[1] = 1;
-    c.up[2] = 0;
-    return c;
+	double t = SineParameterize(frame, nframes, nframes/10);
+	Camera c;
+	c.near = 5;
+	c.far = 200;
+	c.angle = M_PI/6;
+	c.position[0] = 40*sin(2*M_PI*t);
+	c.position[1] = 40*cos(2*M_PI*t);
+	c.position[2] = 40;
+	c.focus[0] = 0;
+	c.focus[1] = 0;
+	c.focus[2] = 0;
+	c.up[0] = 0;
+	c.up[1] = 1;
+	c.up[2] = 0;
+	return c;
 }
 
 // +------------------------------+
@@ -294,18 +292,20 @@ Screen::Screen(int height, int width, unsigned char *buffer) {
 	this->height = height;
 
 	int npixels = width * height;
-
 	int i;
+
 	// Black out the buffer
 	for (i = 0; i < npixels*3; i++) {
-	   this->buffer[i] = 0;
+	   buffer[i] = 0;
 	}
+	this->buffer = buffer;
 
 	// Initialize the zBuffer
 	double zBuffer[npixels];
 	for (i = 0; i < npixels; ++i) {
-		this->zBuffer[i] = -1.0;
+		zBuffer[i] = -1.0;
 	}
+	this->zBuffer = zBuffer;
 }
 
 void Screen::ImageColor(int row, int column, double z, double color[3]) {
@@ -560,186 +560,186 @@ void drawTriangle(Triangle triangle, Screen screen) {
 // Hank's Given Methods (Reading, etc)
 // ===================================
 std::vector<Triangle> GetTriangles(void) {
-    vtkPolyDataReader *rdr = vtkPolyDataReader::New();
-    rdr->SetFileName("proj1e_geometry.vtk");
-    cerr << "Reading" << endl;
-    rdr->Update();
-    cerr << "Done reading" << endl;
-    if (rdr->GetOutput()->GetNumberOfCells() == 0)
-    {
-        cerr << "Unable to open file!!" << endl;
-        exit(EXIT_FAILURE);
-    }
-    vtkPolyData *pd = rdr->GetOutput();
+	vtkPolyDataReader *rdr = vtkPolyDataReader::New();
+	rdr->SetFileName("proj1e_geometry.vtk");
+	cerr << "Reading" << endl;
+	rdr->Update();
+	cerr << "Done reading" << endl;
+	if (rdr->GetOutput()->GetNumberOfCells() == 0)
+	{
+		cerr << "Unable to open file!!" << endl;
+		exit(EXIT_FAILURE);
+	}
+	vtkPolyData *pd = rdr->GetOutput();
 
-    int numTris = pd->GetNumberOfCells();
-    vtkPoints *pts = pd->GetPoints();
-    vtkCellArray *cells = pd->GetPolys();
-    vtkDoubleArray *var = (vtkDoubleArray *) pd->GetPointData()->GetArray("hardyglobal");
-    double *color_ptr = var->GetPointer(0);
-    //vtkFloatArray *var = (vtkFloatArray *) pd->GetPointData()->GetArray("hardyglobal");
-    //float *color_ptr = var->GetPointer(0);
-    vtkFloatArray *n = (vtkFloatArray *) pd->GetPointData()->GetNormals();
-    float *normals = n->GetPointer(0);
-    std::vector<Triangle> tris(numTris);
-    vtkIdType npts;
-    vtkIdType *ptIds;
-    int idx;
-    for (idx = 0, cells->InitTraversal() ; cells->GetNextCell(npts, ptIds) ; idx++)
-    {
-        if (npts != 3)
-        {
-            cerr << "Non-triangles!! ???" << endl;
-            exit(EXIT_FAILURE);
-        }
-        double *pt = NULL;
-        pt = pts->GetPoint(ptIds[0]);
-        tris[idx].X[0] = pt[0];
-        tris[idx].Y[0] = pt[1];
-        tris[idx].Z[0] = pt[2];
+	int numTris = pd->GetNumberOfCells();
+	vtkPoints *pts = pd->GetPoints();
+	vtkCellArray *cells = pd->GetPolys();
+	vtkDoubleArray *var = (vtkDoubleArray *) pd->GetPointData()->GetArray("hardyglobal");
+	double *color_ptr = var->GetPointer(0);
+	//vtkFloatArray *var = (vtkFloatArray *) pd->GetPointData()->GetArray("hardyglobal");
+	//float *color_ptr = var->GetPointer(0);
+	vtkFloatArray *n = (vtkFloatArray *) pd->GetPointData()->GetNormals();
+	float *normals = n->GetPointer(0);
+	std::vector<Triangle> tris(numTris);
+	vtkIdType npts;
+	vtkIdType *ptIds;
+	int idx;
+	for (idx = 0, cells->InitTraversal() ; cells->GetNextCell(npts, ptIds) ; idx++)
+	{
+		if (npts != 3)
+		{
+			cerr << "Non-triangles!! ???" << endl;
+			exit(EXIT_FAILURE);
+		}
+		double *pt = NULL;
+		pt = pts->GetPoint(ptIds[0]);
+		tris[idx].X[0] = pt[0];
+		tris[idx].Y[0] = pt[1];
+		tris[idx].Z[0] = pt[2];
 	#ifdef NORMALS
-        tris[idx].normals[0][0] = normals[3*ptIds[0]+0];
-        tris[idx].normals[0][1] = normals[3*ptIds[0]+1];
-        tris[idx].normals[0][2] = normals[3*ptIds[0]+2];
+		tris[idx].normals[0][0] = normals[3*ptIds[0]+0];
+		tris[idx].normals[0][1] = normals[3*ptIds[0]+1];
+		tris[idx].normals[0][2] = normals[3*ptIds[0]+2];
 	#endif
-        pt = pts->GetPoint(ptIds[1]);
-        tris[idx].X[1] = pt[0];
-        tris[idx].Y[1] = pt[1];
-        tris[idx].Z[1] = pt[2];
+		pt = pts->GetPoint(ptIds[1]);
+		tris[idx].X[1] = pt[0];
+		tris[idx].Y[1] = pt[1];
+		tris[idx].Z[1] = pt[2];
 	#ifdef NORMALS
-        tris[idx].normals[1][0] = normals[3*ptIds[1]+0];
-        tris[idx].normals[1][1] = normals[3*ptIds[1]+1];
-        tris[idx].normals[1][2] = normals[3*ptIds[1]+2];
+		tris[idx].normals[1][0] = normals[3*ptIds[1]+0];
+		tris[idx].normals[1][1] = normals[3*ptIds[1]+1];
+		tris[idx].normals[1][2] = normals[3*ptIds[1]+2];
 	#endif
-        pt = pts->GetPoint(ptIds[2]);
-        tris[idx].X[2] = pt[0];
-        tris[idx].Y[2] = pt[1];
-        tris[idx].Z[2] = pt[2];
+		pt = pts->GetPoint(ptIds[2]);
+		tris[idx].X[2] = pt[0];
+		tris[idx].Y[2] = pt[1];
+		tris[idx].Z[2] = pt[2];
 	#ifdef NORMALS
-        tris[idx].normals[2][0] = normals[3*ptIds[2]+0];
-        tris[idx].normals[2][1] = normals[3*ptIds[2]+1];
-        tris[idx].normals[2][2] = normals[3*ptIds[2]+2];
+		tris[idx].normals[2][0] = normals[3*ptIds[2]+0];
+		tris[idx].normals[2][1] = normals[3*ptIds[2]+1];
+		tris[idx].normals[2][2] = normals[3*ptIds[2]+2];
 	#endif
 
-        // 1->2 interpolate between light blue, dark blue
-        // 2->2.5 interpolate between dark blue, cyan
-        // 2.5->3 interpolate between cyan, green
-        // 3->3.5 interpolate between green, yellow
-        // 3.5->4 interpolate between yellow, orange
-        // 4->5 interpolate between orange, brick
-        // 5->6 interpolate between brick, salmon
-        double mins[7] = { 1, 2, 2.5, 3, 3.5, 4, 5 };
-        double maxs[7] = { 2, 2.5, 3, 3.5, 4, 5, 6 };
-        unsigned char RGB[8][3] = { { 71, 71, 219 }, 
-                                    { 0, 0, 91 },
-                                    { 0, 255, 255 },
-                                    { 0, 128, 0 },
-                                    { 255, 255, 0 },
-                                    { 255, 96, 0 },
-                                    { 107, 0, 0 },
-                                    { 224, 76, 76 } 
-                                  };
-        for (int j = 0 ; j < 3 ; j++)
-        {
-            float val = color_ptr[ptIds[j]];
-            int r;
-            for (r = 0 ; r < 7 ; r++)
-            {
-                if (mins[r] <= val && val < maxs[r])
-                    break;
-            }
-            if (r == 7)
-            {
-                cerr << "Could not interpolate color for " << val << endl;
-                exit(EXIT_FAILURE);
-            }
-            double proportion = (val-mins[r]) / (maxs[r]-mins[r]);
-            tris[idx].colors[j][0] = (RGB[r][0]+proportion*(RGB[r+1][0]-RGB[r][0]))/255.0;
-            tris[idx].colors[j][1] = (RGB[r][1]+proportion*(RGB[r+1][1]-RGB[r][1]))/255.0;
-            tris[idx].colors[j][2] = (RGB[r][2]+proportion*(RGB[r+1][2]-RGB[r][2]))/255.0;
-        }
-    }
+		// 1->2 interpolate between light blue, dark blue
+		// 2->2.5 interpolate between dark blue, cyan
+		// 2.5->3 interpolate between cyan, green
+		// 3->3.5 interpolate between green, yellow
+		// 3.5->4 interpolate between yellow, orange
+		// 4->5 interpolate between orange, brick
+		// 5->6 interpolate between brick, salmon
+		double mins[7] = { 1, 2, 2.5, 3, 3.5, 4, 5 };
+		double maxs[7] = { 2, 2.5, 3, 3.5, 4, 5, 6 };
+		unsigned char RGB[8][3] = { { 71, 71, 219 }, 
+									{ 0, 0, 91 },
+									{ 0, 255, 255 },
+									{ 0, 128, 0 },
+									{ 255, 255, 0 },
+									{ 255, 96, 0 },
+									{ 107, 0, 0 },
+									{ 224, 76, 76 } 
+								  };
+		for (int j = 0 ; j < 3 ; j++)
+		{
+			float val = color_ptr[ptIds[j]];
+			int r;
+			for (r = 0 ; r < 7 ; r++)
+			{
+				if (mins[r] <= val && val < maxs[r])
+					break;
+			}
+			if (r == 7)
+			{
+				cerr << "Could not interpolate color for " << val << endl;
+				exit(EXIT_FAILURE);
+			}
+			double proportion = (val-mins[r]) / (maxs[r]-mins[r]);
+			tris[idx].colors[j][0] = (RGB[r][0]+proportion*(RGB[r+1][0]-RGB[r][0]))/255.0;
+			tris[idx].colors[j][1] = (RGB[r][1]+proportion*(RGB[r+1][1]-RGB[r][1]))/255.0;
+			tris[idx].colors[j][2] = (RGB[r][2]+proportion*(RGB[r+1][2]-RGB[r][2]))/255.0;
+		}
+	}
 
-    return tris;
+	return tris;
 }
 
 std::vector<Triangle> GetTriangles2(void) {
-    vtkPolyDataReader *rdr = vtkPolyDataReader::New();
-    rdr->SetFileName("proj1d_geometry.vtk");
-    cerr << "Reading" << endl;
-    rdr->Update();
-    cerr << "Done reading" << endl;
-    if (rdr->GetOutput()->GetNumberOfCells() == 0)
-    {
-        cerr << "Unable to open file!!" << endl;
-        exit(EXIT_FAILURE);
-    }
-    vtkPolyData *pd = rdr->GetOutput();
-    int numTris = pd->GetNumberOfCells();
-    vtkPoints *pts = pd->GetPoints();
-    vtkCellArray *cells = pd->GetPolys();
-    vtkFloatArray *var = (vtkFloatArray *) pd->GetPointData()->GetArray("hardyglobal");
-    float *color_ptr = var->GetPointer(0);
-    std::vector<Triangle> tris(numTris);
-    vtkIdType npts;
-    vtkIdType *ptIds;
-    int idx;
-    for (idx = 0, cells->InitTraversal() ; cells->GetNextCell(npts, ptIds) ; idx++)
-    {
-        if (npts != 3)
-        {
-            cerr << "Non-triangles!! ???" << endl;
-            exit(EXIT_FAILURE);
-        }
-        tris[idx].X[0] = pts->GetPoint(ptIds[0])[0];
-        tris[idx].X[1] = pts->GetPoint(ptIds[1])[0];
-        tris[idx].X[2] = pts->GetPoint(ptIds[2])[0];
-        tris[idx].Y[0] = pts->GetPoint(ptIds[0])[1];
-        tris[idx].Y[1] = pts->GetPoint(ptIds[1])[1];
-        tris[idx].Y[2] = pts->GetPoint(ptIds[2])[1];
-        tris[idx].Z[0] = pts->GetPoint(ptIds[0])[2];
-        tris[idx].Z[1] = pts->GetPoint(ptIds[1])[2];
-        tris[idx].Z[2] = pts->GetPoint(ptIds[2])[2];
-        // 1->2 interpolate between light blue, dark blue
-        // 2->2.5 interpolate between dark blue, cyan
-        // 2.5->3 interpolate between cyan, green
-        // 3->3.5 interpolate between green, yellow
-        // 3.5->4 interpolate between yellow, orange
-        // 4->5 interpolate between orange, brick
-        // 5->6 interpolate between brick, salmon
-        double mins[7] = { 1, 2, 2.5, 3, 3.5, 4, 5 };
-        double maxs[7] = { 2, 2.5, 3, 3.5, 4, 5, 6 };
-        unsigned char RGB[8][3] = { { 71, 71, 219 }, 
-                                    { 0, 0, 91 },
-                                    { 0, 255, 255 },
-                                    { 0, 128, 0 },
-                                    { 255, 255, 0 },
-                                    { 255, 96, 0 },
-                                    { 107, 0, 0 },
-                                    { 224, 76, 76 } 
-                                  };
-        for (int j = 0 ; j < 3 ; j++)
-        {
-            float val = color_ptr[ptIds[j]];
-            int r;
-            for (r = 0 ; r < 7 ; r++)
-            {
-                if (mins[r] <= val && val < maxs[r])
-                    break;
-            }
-            if (r == 7)
-            {
-                cerr << "Could not interpolate color for " << val << endl;
-                exit(EXIT_FAILURE);
-            }
-            double proportion = (val-mins[r]) / (maxs[r]-mins[r]);
-            tris[idx].colors[j][0] = (RGB[r][0]+proportion*(RGB[r+1][0]-RGB[r][0]))/255.0;
-            tris[idx].colors[j][1] = (RGB[r][1]+proportion*(RGB[r+1][1]-RGB[r][1]))/255.0;
-            tris[idx].colors[j][2] = (RGB[r][2]+proportion*(RGB[r+1][2]-RGB[r][2]))/255.0;
-        }
-    }
+	vtkPolyDataReader *rdr = vtkPolyDataReader::New();
+	rdr->SetFileName("proj1d_geometry.vtk");
+	cerr << "Reading" << endl;
+	rdr->Update();
+	cerr << "Done reading" << endl;
+	if (rdr->GetOutput()->GetNumberOfCells() == 0)
+	{
+		cerr << "Unable to open file!!" << endl;
+		exit(EXIT_FAILURE);
+	}
+	vtkPolyData *pd = rdr->GetOutput();
+	int numTris = pd->GetNumberOfCells();
+	vtkPoints *pts = pd->GetPoints();
+	vtkCellArray *cells = pd->GetPolys();
+	vtkFloatArray *var = (vtkFloatArray *) pd->GetPointData()->GetArray("hardyglobal");
+	float *color_ptr = var->GetPointer(0);
+	std::vector<Triangle> tris(numTris);
+	vtkIdType npts;
+	vtkIdType *ptIds;
+	int idx;
+	for (idx = 0, cells->InitTraversal() ; cells->GetNextCell(npts, ptIds) ; idx++)
+	{
+		if (npts != 3)
+		{
+			cerr << "Non-triangles!! ???" << endl;
+			exit(EXIT_FAILURE);
+		}
+		tris[idx].X[0] = pts->GetPoint(ptIds[0])[0];
+		tris[idx].X[1] = pts->GetPoint(ptIds[1])[0];
+		tris[idx].X[2] = pts->GetPoint(ptIds[2])[0];
+		tris[idx].Y[0] = pts->GetPoint(ptIds[0])[1];
+		tris[idx].Y[1] = pts->GetPoint(ptIds[1])[1];
+		tris[idx].Y[2] = pts->GetPoint(ptIds[2])[1];
+		tris[idx].Z[0] = pts->GetPoint(ptIds[0])[2];
+		tris[idx].Z[1] = pts->GetPoint(ptIds[1])[2];
+		tris[idx].Z[2] = pts->GetPoint(ptIds[2])[2];
+		// 1->2 interpolate between light blue, dark blue
+		// 2->2.5 interpolate between dark blue, cyan
+		// 2.5->3 interpolate between cyan, green
+		// 3->3.5 interpolate between green, yellow
+		// 3.5->4 interpolate between yellow, orange
+		// 4->5 interpolate between orange, brick
+		// 5->6 interpolate between brick, salmon
+		double mins[7] = { 1, 2, 2.5, 3, 3.5, 4, 5 };
+		double maxs[7] = { 2, 2.5, 3, 3.5, 4, 5, 6 };
+		unsigned char RGB[8][3] = { { 71, 71, 219 }, 
+									{ 0, 0, 91 },
+									{ 0, 255, 255 },
+									{ 0, 128, 0 },
+									{ 255, 255, 0 },
+									{ 255, 96, 0 },
+									{ 107, 0, 0 },
+									{ 224, 76, 76 } 
+								  };
+		for (int j = 0 ; j < 3 ; j++)
+		{
+			float val = color_ptr[ptIds[j]];
+			int r;
+			for (r = 0 ; r < 7 ; r++)
+			{
+				if (mins[r] <= val && val < maxs[r])
+					break;
+			}
+			if (r == 7)
+			{
+				cerr << "Could not interpolate color for " << val << endl;
+				exit(EXIT_FAILURE);
+			}
+			double proportion = (val-mins[r]) / (maxs[r]-mins[r]);
+			tris[idx].colors[j][0] = (RGB[r][0]+proportion*(RGB[r+1][0]-RGB[r][0]))/255.0;
+			tris[idx].colors[j][1] = (RGB[r][1]+proportion*(RGB[r+1][1]-RGB[r][1]))/255.0;
+			tris[idx].colors[j][2] = (RGB[r][2]+proportion*(RGB[r+1][2]-RGB[r][2]))/255.0;
+		}
+	}
 
-    return tris;
+	return tris;
 }
 
 // +-------------+
@@ -752,9 +752,9 @@ int main(int argc, char *argv[]) {
 	vtkImageData *image   = NewImage(1000, 1000);
 	unsigned char *buffer = (unsigned char *) image->GetScalarPointer(0,0,0);
 
-	std::vector<Triangle> triangles = GetTriangles2();
+	std::vector<Triangle> triangles = GetTriangles();
 
-	Screen screen = new Screen(1000, 1000, buffer);
+	Screen screen = Screen(1000, 1000, buffer);
 
 	// Draw the triangles!
 	for (auto triangle : triangles) {
