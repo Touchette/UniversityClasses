@@ -140,14 +140,14 @@ Matrix Camera::DeviceTransform(int width, int height) {
 	Matrix matrix;	
 
 	// Row 1
-	Matrix[0][0] = width / 2;
+	Matrix[0][0] = width / 2.0;
 	Matrix[0][1] = 0.0;
 	Matrix[0][2] = 0.0;
 	Matrix[0][3] = 0.0;
 
 	// Row 2
 	Matrix[1][0] = 0.0;
-	Matrix[1][1] = height / 2;
+	Matrix[1][1] = height / 2.0;
 	Matrix[1][2] = 0.0;
 	Matrix[1][3] = 0.0;
 
@@ -158,8 +158,8 @@ Matrix Camera::DeviceTransform(int width, int height) {
 	Matrix[2][3] = 0.0;
 
 	// Row 4
-	Matrix[3][0] = width / 2;
-	Matrix[3][1] = height / 2;
+	Matrix[3][0] = width / 2.0;
+	Matrix[3][1] = height / 2.0;
 	Matrix[3][2] = 0.0;
 	Matrix[3][3] = 1.0;
 
@@ -170,14 +170,14 @@ Matrix Camera::ViewTransform() {
 	Matrix matrix;	
 
 	// Row 1
-	Matrix[0][0] = cotan(this->angle / 2);
+	Matrix[0][0] = cotan(this->angle / 2.0);
 	Matrix[0][1] = 0.0;
 	Matrix[0][2] = 0.0;
 	Matrix[0][3] = 0.0;
 
 	// Row 2
 	Matrix[1][0] = 0.0;
-	Matrix[1][1] = cotan(this->angle / 2);
+	Matrix[1][1] = cotan(this->angle / 2.0);
 	Matrix[1][2] = 0.0;
 	Matrix[1][3] = 0.0;
 
@@ -190,22 +190,37 @@ Matrix Camera::ViewTransform() {
 	// Row 4
 	Matrix[3][0] = 0.0;
 	Matrix[3][1] = 0.0;
-	Matrix[3][2] = (2 * (this->far * this->near)) / (this->far - this->near);
+	Matrix[3][2] = (2.0 * (this->far * this->near)) / (this->far - this->near);
 	Matrix[3][3] = 0.0;
 
 	return matrix;
 }
 
 Matrix Camera::CameraTransform() {
+	int i;
 	double origin = this->position;
-	double w[3]   = { origin[0] - focus[0],
-					  origin[1] - focus[1],
-					  origin[2] - focus[2] };
-	double u[3]   = cross_product(this->up, w);
-	double v[3]   = cross_product(w, u);
-	double t[3]   = { 0.0 - origin[0],
-					  0.0 - origin[1],
-					  0.0 - origin[2] };
+
+	// w vector, which is used by u (so I declare it first)
+	double w[3]  = { (origin[0] - focus[0]),
+					 (origin[1] - focus[1]),
+					 (origin[2] - focus[2]) };
+	double normW = sqrt(w[0]**2 + w[1]**2, + w[2]**2);
+	for (i=0;i<3;++i) { w[i] /= normW; }
+
+	// u vector, which is used by v (so I declare it second)
+	double u[3]  = cross_product(this->up, w);
+	double normU = sqrt(u[0]**2 + u[1]**2, + u[2]**2);
+	for (i=0;i<3;++i) { u[i] /= normU; }
+
+	// v vector
+	double v[3]  = cross_product(w, u);
+	double normV = sqrt(v[0]**2 + v[1]**2, + v[2]**2);
+	for (i=0;i<3;++i) { v[i] /= normV; }
+
+	// t vector
+	double t[3] = { 0.0 - origin[0],
+					0.0 - origin[1],
+					0.0 - origin[2] };
 
 	Matrix matrix;	
 
@@ -241,7 +256,7 @@ double dot_product(double *a, double *b) {
 
 	int i;
 	for (i = 0; i<3; ++i) {
-		product += a[i] + b[i];
+		product += a[i] * b[i];
 	}
 
 	return product;
@@ -515,7 +530,6 @@ void rasterizeTriangle(Triangle triangle, Screen screen) {
 			exit(1);
 	}
 
-
 	// Get the left slope and right slope
 	double leftSlope  = triangle.findSlope(1);
 	double rightSlope = triangle.findSlope(0);
@@ -704,11 +718,57 @@ void drawTriangle(Triangle triangle, Screen screen) {
 	}
 }
 
-std::vector<Triangle> transformTrianglesToDeviceSpace(std::vector<Triangle> triangles, Screen screen) {
+void transformToDevSpace(Triangle triangle, Screen screen, Camera camera) {
+	// The triangles original vertices
+	originalX = triangle.X;
+	originalY = triangle.Y;
+	originalZ = triangle.Z;
 
+	// The three transformation matrices
+	Matrix cameraMatrix = camera.CameraTransform(); 
+	Matrix viewMatrix   = camera.ViewTransform();
+	Matrix devMatrix    = camera.DeviceTransform(screen.width, screen.height);
 
+	Matrix intermediateMatrix = ComposeMatrices(cameraMatrix, viewMatrix);
+	Matrix finalMatrix        = ComposeMatrices(intermediateMatrix, devMatrix);
 
+	double xInPoint[4] = { triangle.X[0],
+						   triangle.Y[0],
+						   triangle.Z[0], 
+						   1.0 };
+	double yInPoint[4] = { triangle.X[1],
+						   triangle.Y[1],
+						   triangle.Z[1], 
+						   1.0 };
+	double zInPoint[4] = { triangle.X[2],
+						   triangle.Y[2],
+						   triangle.Z[2], 
+						   1.0 };
+	double xOutPoint[4], yOutPoint[4], zOutPoint[4];
 
+	// Transform the points with the final matrix
+	finalMatrix.TransformPoint(xInPoint, xOutPoint);
+	finalMatrix.TransformPoint(yInPoint, yOutPoint);
+	finalMatrix.TransformPoint(zInPoint, zOutPoint);
+
+	int i;
+	for (i=0; i<3; ++i) {
+		(xOutPoint[3]) != 0 ? xOutPoint[i] /= xOutPoint[3] : (void)0;
+		(yOutPoint[3]) != 0 ? yOutPoint[i] /= yOutPoint[3] : (void)0;
+		(zOutPoint[3]) != 0 ? zOutPoint[i] /= zOutPoint[3] : (void)0;
+	}
+
+	// New triangle vertices
+	triangle.X = { xOutPoint[0], xOutPoint[1], xOutPoint[2] };
+	triangle.Y = { yOutPoint[0], yOutPoint[1], yOutPoint[2] };
+	triangle.Z = { zOutPoint[0], zOutPoint[1], zOutPoint[2] };
+
+	drawTriangle(triangle, screen);
+
+	// Reset the triangle
+	triangle.X = originalX;
+	triangle.Y = originalY;
+	triangle.X = originalZ;
 }
 
 // ===================================
@@ -916,12 +976,12 @@ int main(int argc, char *argv[]) {
 		// initialize the camera position as well as initialize the screen
 		// to be blacked out, zbuffer reset
 		screen.InitializeScreen();
-		Camera c = GetCamera(i, 1000);
+		Camera camera = GetCamera(i, 1000);
 
 		// Draw the triangles!
-		std::vector<Triangle> tempTriangles = transformTrianglesToDeviceSpace(triangles, screen);
-		for (auto triangle : tempTriangles) {
-			drawTriangle(triangle, screen);
+		// std::vector<Triangle> tempTriangles = transformToDevSpace(triangles, screen, camera);
+		for (auto triangle : triangles) {
+			transformToDevSpace(triangle, screen, camera);
 		}
 
 		// Set up filename and write the file out
