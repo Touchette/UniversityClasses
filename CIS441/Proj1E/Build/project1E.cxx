@@ -1,3 +1,4 @@
+#include <math.h>
 #include <iostream>
 #include <algorithm>
 #include <vtkDataSet.h>
@@ -32,6 +33,10 @@ double ceil_441(double f) {
 
 double floor_441(double f) {
 	return floor(f+0.00001);
+}
+
+double cotan(double num) {
+	return (1 / tan(num));
 }
 
 vtkImageData * NewImage(int width, int height) {
@@ -122,11 +127,135 @@ class Camera {
 	double focus[3];
 	double up[3];
 
-	Matrix ViewTransform(void) {;};
-	Matrix CameraTransform(void) {;};
-	Matrix DeviceTransform(void) {;};
+	Matrix ViewTransform(void);
+	Matrix CameraTransform(void);
+	Matrix DeviceTransform(int width, int height);
 };
 
+Matrix Camera::DeviceTransform(int width, int height) {
+	// Cast the width and height to doubles
+	width  = double (width);
+	height = double (height);
+
+	Matrix matrix;	
+
+	// Row 1
+	Matrix[0][0] = width / 2;
+	Matrix[0][1] = 0.0;
+	Matrix[0][2] = 0.0;
+	Matrix[0][3] = 0.0;
+
+	// Row 2
+	Matrix[1][0] = 0.0;
+	Matrix[1][1] = height / 2;
+	Matrix[1][2] = 0.0;
+	Matrix[1][3] = 0.0;
+
+	// Row 3
+	Matrix[2][0] = 0.0;
+	Matrix[2][1] = 0.0;
+	Matrix[2][2] = 1.0;
+	Matrix[2][3] = 0.0;
+
+	// Row 4
+	Matrix[3][0] = width / 2;
+	Matrix[3][1] = height / 2;
+	Matrix[3][2] = 0.0;
+	Matrix[3][3] = 1.0;
+
+	return matrix;
+}
+
+Matrix Camera::ViewTransform() {
+	Matrix matrix;	
+
+	// Row 1
+	Matrix[0][0] = cotan(this->angle / 2);
+	Matrix[0][1] = 0.0;
+	Matrix[0][2] = 0.0;
+	Matrix[0][3] = 0.0;
+
+	// Row 2
+	Matrix[1][0] = 0.0;
+	Matrix[1][1] = cotan(this->angle / 2);
+	Matrix[1][2] = 0.0;
+	Matrix[1][3] = 0.0;
+
+	// Row 3
+	Matrix[2][0] = 0.0;
+	Matrix[2][1] = 0.0;
+	Matrix[2][2] = (this->far + this->near) / (this->far - this->near);
+	Matrix[2][3] = -1.0;
+
+	// Row 4
+	Matrix[3][0] = 0.0;
+	Matrix[3][1] = 0.0;
+	Matrix[3][2] = (2 * (this->far * this->near)) / (this->far - this->near);
+	Matrix[3][3] = 0.0;
+
+	return matrix;
+}
+
+Matrix Camera::CameraTransform() {
+	double origin = this->position;
+	double w[3]   = { origin[0] - focus[0],
+					  origin[1] - focus[1],
+					  origin[2] - focus[2] };
+	double u[3]   = cross_product(this->up, w);
+	double v[3]   = cross_product(w, u);
+	double t[3]   = { 0.0 - origin[0],
+					  0.0 - origin[1],
+					  0.0 - origin[2] };
+
+	Matrix matrix;	
+
+	// Row 1
+	Matrix[0][0] = u[0];
+	Matrix[0][1] = v[0];
+	Matrix[0][2] = w[0];
+	Matrix[0][3] = 0.0;
+
+	// Row 2
+	Matrix[1][0] = u[1];
+	Matrix[1][1] = v[1];
+	Matrix[1][2] = w[1];
+	Matrix[1][3] = 0.0;
+
+	// Row 3
+	Matrix[2][0] = u[2];
+	Matrix[2][1] = v[2];
+	Matrix[2][2] = w[2];
+	Matrix[2][3] = 0.0;
+
+	// Row 4
+	Matrix[3][0] = dot_product(u, t);
+	Matrix[3][1] = dot_product(v, t);
+	Matrix[3][2] = dot_product(w, t);
+	Matrix[3][3] = 1.0;
+
+	return matrix;
+}
+
+double dot_product(double *a, double *b) {
+	double result = 0.0;
+
+	int i;
+	for (i = 0; i<3; ++i) {
+		product += a[i] + b[i];
+	}
+
+	return product;
+}
+
+double * cross_product(double *a, double *b) {
+	double retArray[3];
+
+	retArray[0] = (a[1] * b[2]) - (a[2] * b[1]);
+	retArray[1] = (a[0] * b[2]) - (a[2] * b[0]);
+	retArray[2] = (a[0] * b[1]) - (b[1] * b[0]);
+
+	return retArray;	
+}
 
 double SineParameterize(int curFrame, int nFrames, int ramp) {
 	int nNonRamp = nFrames-2*ramp;
@@ -283,6 +412,8 @@ class Screen {
 
 	Screen(int height, int width, unsigned char *buffer);
 
+	void InitializeScreen();
+
 	void ImageColor(int row, int column, double z, double color[3]);
 };
 
@@ -301,6 +432,23 @@ Screen::Screen(int height, int width, unsigned char *buffer) {
 	this->buffer = buffer;
 
 	// Initialize the zBuffer
+	double zBuffer[npixels];
+	for (i = 0; i < npixels; ++i) {
+		zBuffer[i] = -1.0;
+	}
+	this->zBuffer = zBuffer;
+}
+
+void Screen::InitializeScreen() {
+	int npixels = this->width * this->height;
+
+	int i;
+	// Reset the buffer
+	for (i = 0; i < npixels*3; i++) {
+	   this->buffer[i] = 0;
+	}
+
+	// Reset the zBuffer
 	double zBuffer[npixels];
 	for (i = 0; i < npixels; ++i) {
 		zBuffer[i] = -1.0;
@@ -556,6 +704,13 @@ void drawTriangle(Triangle triangle, Screen screen) {
 	}
 }
 
+std::vector<Triangle> transformTrianglesToDeviceSpace(std::vector<Triangle> triangles, Screen screen) {
+
+
+
+
+}
+
 // ===================================
 // Hank's Given Methods (Reading, etc)
 // ===================================
@@ -756,10 +911,24 @@ int main(int argc, char *argv[]) {
 
 	Screen screen = Screen(1000, 1000, buffer);
 
-	// Draw the triangles!
-	for (auto triangle : triangles) {
-		drawTriangle(triangle, screen);
+	int i;
+	for (i = 0; i<=1000; i+250) {
+		// initialize the camera position as well as initialize the screen
+		// to be blacked out, zbuffer reset
+		screen.InitializeScreen();
+		Camera c = GetCamera(i, 1000);
+
+		// Draw the triangles!
+		std::vector<Triangle> tempTriangles = transformTrianglesToDeviceSpace(triangles, screen);
+		for (auto triangle : tempTriangles) {
+			drawTriangle(triangle, screen);
+		}
+
+		// Set up filename and write the file out
+		char fileBuffer[50];
+		sprintf(fileBuffer, "frame%d", i);
+		WriteImage(image, fileBuffer);
 	}
 
-	WriteImage(image, "allTriangles");
+	// WriteImage(image, "allTriangles");
 }
