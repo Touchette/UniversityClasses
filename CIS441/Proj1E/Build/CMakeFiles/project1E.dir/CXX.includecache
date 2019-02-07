@@ -7,6 +7,8 @@
 #IncludeRegexTransform: 
 
 /home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj1E/Build/project1E.cxx
+math.h
+-
 iostream
 -
 algorithm
