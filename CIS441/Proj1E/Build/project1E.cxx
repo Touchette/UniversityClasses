@@ -758,9 +758,9 @@ void transformToDevSpace(Triangle triangle, Screen screen, Camera camera) {
 
 	// Make sure we don't divide by 0
 	for (i=0; i<3; ++i) {
-		(xOutPoint[3] != 0) ? xOutPoint[i] /= xOutPoint[3] : i+0 ;
-		(yOutPoint[3] != 0) ? yOutPoint[i] /= yOutPoint[3] : i+0 ;
-		(zOutPoint[3] != 0) ? zOutPoint[i] /= zOutPoint[3] : i+0 ;
+		(xOutPoint[3] != 0) ? xOutPoint[i] /= xOutPoint[3] : i+0;
+		(yOutPoint[3] != 0) ? yOutPoint[i] /= yOutPoint[3] : i+0;
+		(zOutPoint[3] != 0) ? zOutPoint[i] /= zOutPoint[3] : i+0;
 	}
 
 	// New triangle vertices
