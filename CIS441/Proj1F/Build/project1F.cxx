@@ -452,7 +452,7 @@ class Screen {
 
 	void InitializeScreen();
 
-	void ImageColor(int row, int column, double z, double color[3]);
+	void ImageColor(int row, int column, double z, double color[3], double shading);
 };
 
 Screen::Screen(int height, int width, unsigned char *buffer) {
@@ -494,7 +494,7 @@ void Screen::InitializeScreen() {
 	this->zBuffer = zBuffer;
 }
 
-void Screen::ImageColor(int row, int column, double z, double color[3]) {
+void Screen::ImageColor(int row, int column, double z, double color[3], double shading) {
 	// Make sure to not go outside the bounds of the image when coloring
 	if (row < 0 || row >= this->height) {
 		return;
@@ -510,9 +510,9 @@ void Screen::ImageColor(int row, int column, double z, double color[3]) {
 	this->zBuffer[(row * this->width) + column] = z;
 	// Write the three colors to the buffer
 	int index = 3 * ((row * this->width) + column);
-	this->buffer[index+0] = (unsigned char) ceil_441(255*color[0]);
-	this->buffer[index+1] = (unsigned char) ceil_441(255*color[1]);
-	this->buffer[index+2] = (unsigned char) ceil_441(255*color[2]);
+	this->buffer[index+0] = (unsigned char) ceil_441(min(color[0]*shading, 1.0) * 255.0);
+	this->buffer[index+1] = (unsigned char) ceil_441(min(color[1]*shading, 1.0) * 255.0);
+	this->buffer[index+2] = (unsigned char) ceil_441(min(color[2]*shading, 1.0) * 255.0);
 }
 
 
@@ -526,18 +526,38 @@ void Screen::ImageColor(int row, int column, double z, double color[3]) {
 // Triangle-related methods 
 // ========================
 double calculateShading(double *viewDirection, double *normal) {
-	return 0.5;
+	double L[3] = { lp.lightDir[0], lp.lightDir[1], lp.lightDir[2] };
+	double lenV     = sqrt(pow(viewDirection[0], 2) + pow(viewDirection[1], 2) + pow(viewDirection[2], 2));
+	double normV[3] = { viewDirection[0] / lenV, viewDirection[1] / lenV, viewDirection[2] / lenV }; 
+
+	// Scalar multiple for the first specular matrix
+	double scalar  = 2 * dot_product(normal, L);
+
+	double specR_1[3] = { scalar * normal[0], scalar * normal[1], scalar * normal[2] };
+	double specR[3]   = { specR_1[0] - L[0], 
+					      specR_1[1] - L[1],
+					      specR_1[2] - L[2] };
+
+    double dotVDR = dot_product(specR, normV);
+	// Spectral Term of the Phong model (K_s * cos(alpha) ^ (shininess))
+	double specTerm = max(0.0, lp.Ks * (pow(dotVDR, lp.alpha)));
+	// Diffuse Term of the Phong model (abs(L dot N))
+	double diffTerm = lp.Kd * abs(dot_product(L, normal));
+	// Ambient Term of the Phong model (a constant)
+	double ambiTerm = lp.Ka;
+
+	return (specTerm + diffTerm + ambiTerm);
 }
 
 void shadeVertices(Triangle *triangle, Camera camera) {
 	double viewDirection1[3] = { camera.position[0] - triangle->X[triangle->vertex1],
+								 camera.position[1] - triangle->Y[triangle->vertex1],
+								 camera.position[2] - triangle->Z[triangle->vertex1] };
+	double viewDirection2[3] = { camera.position[0] - triangle->X[triangle->vertex2],
 								 camera.position[1] - triangle->Y[triangle->vertex2],
-								 camera.position[2] - triangle->Z[triangle->vertex3] };
-	double viewDirection2[3] = { camera.position[0] - triangle->X[triangle->vertex1],
-								 camera.position[1] - triangle->Y[triangle->vertex2],
-								 camera.position[2] - triangle->Z[triangle->vertex3] };
-	double viewDirection3[3] = { camera.position[0] - triangle->X[triangle->vertex1],
-								 camera.position[1] - triangle->Y[triangle->vertex2],
+								 camera.position[2] - triangle->Z[triangle->vertex2] };
+	double viewDirection3[3] = { camera.position[0] - triangle->X[triangle->vertex3],
+								 camera.position[1] - triangle->Y[triangle->vertex3],
 								 camera.position[2] - triangle->Z[triangle->vertex3] };
 
 	double shading1 = calculateShading(viewDirection1, triangle->normals[triangle->vertex1]);
@@ -636,18 +656,13 @@ void rasterizeTriangle(Triangle triangle, Screen screen) {
 			// Color the pixels
 			double t = ((c - leftEnd) / (rightEnd - leftEnd));
 			double shading = leftShade + (t * (rightShade - leftShade));
-			//cout << "shading is : " << shading << endl;
-			double Colors[3] = { min(shading * (ColorsLeft[0] + (t * (ColorsRight[0] - ColorsLeft[0]))), 1.0),
-								 min(shading * (ColorsLeft[1] + (t * (ColorsRight[1] - ColorsLeft[1]))), 1.0),
-								 min(shading * (ColorsLeft[2] + (t * (ColorsRight[2] - ColorsLeft[2]))), 1.0) };
-			//double Colors[3] = { ColorsLeft[0] + (t * (ColorsRight[0] - ColorsLeft[0])),
-			//					 ColorsLeft[1] + (t * (ColorsRight[1] - ColorsLeft[1])),
-			//					 ColorsLeft[2] + (t * (ColorsRight[2] - ColorsLeft[2])) };
-
+			double Colors[3] = { ColorsLeft[0] + (t * (ColorsRight[0] - ColorsLeft[0])),
+								 ColorsLeft[1] + (t * (ColorsRight[1] - ColorsLeft[1])),
+								 ColorsLeft[2] + (t * (ColorsRight[2] - ColorsLeft[2])) };
 
 			double z = leftZ + (t * (rightZ - leftZ));
 
-			screen.ImageColor(r, c, z, Colors);
+			screen.ImageColor(r, c, z, Colors, shading);
 		}
 	}
 }
@@ -995,8 +1010,7 @@ int main(int argc, char *argv[]) {
 
 		// Set up filename and write the file out
 		char fileBuffer[50];
-		sprintf(fileBuffer, "frame%03d", i);
+		sprintf(fileBuffer, "Frames/frame%03d", i);
 		WriteImage(image, fileBuffer);
-		break;
 	}
 }
