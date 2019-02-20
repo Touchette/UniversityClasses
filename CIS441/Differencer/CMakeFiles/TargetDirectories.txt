@@ -1,3 +1,3 @@
-/home/natalie/Documents/Repos/CIS441/Differencer/CMakeFiles/rebuild_cache.dir
-/home/natalie/Documents/Repos/CIS441/Differencer/CMakeFiles/differencer.dir
-/home/natalie/Documents/Repos/CIS441/Differencer/CMakeFiles/edit_cache.dir
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Differencer/CMakeFiles/rebuild_cache.dir
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Differencer/CMakeFiles/differencer.dir
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Differencer/CMakeFiles/edit_cache.dir

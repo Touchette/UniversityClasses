@@ -1,4 +1,4 @@
-# Install script for directory: /home/natalie/Documents/Repos/CIS441/Differencer
+# Install script for directory: /home/natalie/Documents/Repos/UniversityClasses/CIS441/Differencer
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/natalie/Documents/Repos/CIS441/Differencer/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Differencer/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

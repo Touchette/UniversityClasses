@@ -17,9 +17,38 @@
 #define goingDown 0
 #define goingUp 1
 #define arbitrary 2
+#define NORMALS 
 
-using std::cerr;
-using std::endl;
+// I keep using std:: functions so I'll just use this, even
+// though I don't like it
+using namespace std;
+
+// +------------------------+
+// | ********************** |
+// | Global Data Structures |
+// | ********************** |
+// +------------------------+
+
+typedef struct {
+	LightingParameters(void) {
+		lightDir[0] = -0.6;
+		lightDir[1] = 0;
+		lightDir[2] = -0.8;
+		Ka = 0.3;
+		Kd = 0.7;
+		Ks = 2.3;
+		alpha = 2.5;
+	};
+  
+
+	double lightDir[3];  // The direction of the light source
+	double Ka;           // The coefficient for ambient lighting.
+	double Kd;           // The coefficient for diffuse lighting.
+	double Ks;           // The coefficient for specular lighting.
+	double alpha;        // The exponent term for specular lighting.
+} LightingParameters;
+
+LightingParameters lp;
 
 // +------------------+
 // | **************** |
@@ -317,16 +346,16 @@ static const char *TriangleTypes[] = {
 
 class Triangle {
   public:
-	double X[3];
-	double Y[3];
-	double Z[3];
-
+	double X[3], Y[3], Z[3];
 	double colors[3][3];
+	double normals[3][3];
 
 	// Vertices
 	int vertex1 = 0;
 	int vertex2 = 1;
 	int vertex3 = 2;
+
+	double shading[3];
 
 	// Type of triangle this is, default is arbitrary
 	int triangleType = arbitrary;
@@ -335,6 +364,30 @@ class Triangle {
 	double findB(int side); // 1 is left side, 0 is right side
 	double findSlope(int side); // 1 is left side, 0 is right side
 };
+
+double calculateShading(LightingParameters &params, double *viewDirection, double *normal) {
+	return 0.5;
+}
+
+void shadeVertices(Triangle triangle, Camera camera, LightingParameters params) {
+	double viewDirection1[3] = { camera.position[0] - triangle.X[triangle.vertex1],
+								 camera.position[1] - triangle.Y[triangle.vertex1],
+								 camera.position[2] - triangle.Z[triangle.vertex1] };
+	double viewDirection2[3] = { camera.position[0] - triangle.X[triangle.vertex2],
+								 camera.position[1] - triangle.Y[triangle.vertex2],
+								 camera.position[2] - triangle.Z[triangle.vertex2] };
+	double viewDirection3[3] = { camera.position[0] - triangle.X[triangle.vertex3],
+								 camera.position[1] - triangle.Y[triangle.vertex3],
+								 camera.position[2] - triangle.Z[triangle.vertex3] };
+
+	double shading1 = calculateShading(&params, viewDirection1, triangle.normals);
+	double shading2 = calculateShading(&params, viewDirection2, triangle.normals);
+	double shading3 = calculateShading(&params, viewDirection3, triangle.normals);
+
+	triangle.shading[vertex1] = shading1;
+	triangle.shading[vertex2] = shading2;
+	triangle.shading[vertex3] = shading3;
+}
 
 void Triangle::findVertices() {
 	// Ethan Quick helped me by explaining the vertex sorting logic...
@@ -542,25 +595,27 @@ void rasterizeTriangle(Triangle triangle, Screen screen) {
 		// T = (x - a) / (b - a)
 		double leftT = (r - Y[vertex1]) / (Y[vertex3] - Y[vertex1]);
 		// LERP Formula -> F(x) = F(a) + t * (F(b) - F(a))
+		// LERP the colors
 		double leftRed   = triangle.colors[vertex1][0] + (leftT * (triangle.colors[vertex3][0] - triangle.colors[vertex1][0]));
 		double leftGreen = triangle.colors[vertex1][1] + (leftT * (triangle.colors[vertex3][1] - triangle.colors[vertex1][1]));
 		double leftBlue  = triangle.colors[vertex1][2] + (leftT * (triangle.colors[vertex3][2] - triangle.colors[vertex1][2]));
+		// LERP the shading
+		double leftShade = triangle.shading[vertex1] + (leftT * (triangle.shading[vertex3] - triangle.shading[vertex1]));
 
 		// T = (x - a) / (b - a)
 		double rightT = (r - Y[vertex2]) / (Y[vertex3] - Y[vertex2]);
 		// LERP Formula -> F(x) = F(a) + t * (F(b) - F(a))
+		// LERP the colors
 		double rightRed   = triangle.colors[vertex2][0] + (rightT * (triangle.colors[vertex3][0] - triangle.colors[vertex2][0]));
 		double rightGreen = triangle.colors[vertex2][1] + (rightT * (triangle.colors[vertex3][1] - triangle.colors[vertex2][1]));
 		double rightBlue  = triangle.colors[vertex2][2] + (rightT * (triangle.colors[vertex3][2] - triangle.colors[vertex2][2]));
+		// LERP the shading
+		double rightShade = triangle.shading[vertex2] + (rightT * (triangle.shading[vertex3] - triangle.shading[vertex2]));
 
 		// Left-hand side colors
-		double ColorsLeft[3]  = { leftRed,
-								  leftGreen,
-								  leftBlue };
+		double ColorsLeft[3]  = { leftRed, leftGreen, leftBlue };
 		// Right-hand side colors
-		double ColorsRight[3] = { rightRed, 
-								  rightGreen,
-								  rightBlue };
+		double ColorsRight[3] = { rightRed, rightGreen, rightBlue };
 
 		// Z-buffer calculations
 		double leftZ  = triangle.Z[vertex1] + (leftT  * (triangle.Z[vertex3] - triangle.Z[vertex1]));
@@ -580,9 +635,10 @@ void rasterizeTriangle(Triangle triangle, Screen screen) {
 		for (c = ceilLeft; c <= floorRight; ++c) {
 			// Color the pixels
 			double t = ((c - leftEnd) / (rightEnd - leftEnd));
-			double Colors[3] = { ColorsLeft[0] + (t * (ColorsRight[0] - ColorsLeft[0])),
-								 ColorsLeft[1] + (t * (ColorsRight[1] - ColorsLeft[1])),
-								 ColorsLeft[2] + (t * (ColorsRight[2] - ColorsLeft[2])) };
+			double shading = leftShade + (t * (rightShade - leftShade));
+			double Colors[3] = { ceil_441(255 * min(shading * (ColorsLeft[0] + (t * (ColorsRight[0] - ColorsLeft[0]))), 1.0)),
+								 ceil_441(255 * min(shading * (ColorsLeft[1] + (t * (ColorsRight[1] - ColorsLeft[1]))), 1.0)),
+								 ceil_441(255 * min(shading * (ColorsLeft[2] + (t * (ColorsRight[2] - ColorsLeft[2]))), 1.0)) };
 
 			double z = leftZ + (t * (rightZ - leftZ));
 
@@ -896,9 +952,11 @@ int main(int argc, char *argv[]) {
 	std::vector<Triangle> triangles = GetTriangles();
 
 	Screen screen = Screen(1000, 1000, buffer);
+	LightingParameters params;
+	params.LightingParameters();
 
 	int i;
-	for (i=0; i<1000; i+=250) {
+	for (i=0; i<1000; ++i) {
 		// Initialize the camera position as well as initialize the screen
 		// to be blacked out, zbuffer reset
 		screen.InitializeScreen();
@@ -906,6 +964,7 @@ int main(int argc, char *argv[]) {
 
 		// Draw the triangles!
 		for (auto triangle : triangles) {
+			shadeVertices(triangle, camera, params);
 			transformToDevSpace(triangle, screen, camera);
 		}
 
