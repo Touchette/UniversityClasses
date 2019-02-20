@@ -29,7 +29,7 @@ using namespace std;
 // | ********************** |
 // +------------------------+
 
-typedef struct {
+struct LightingParameters {
 	LightingParameters(void) {
 		lightDir[0] = -0.6;
 		lightDir[1] = 0;
@@ -39,14 +39,13 @@ typedef struct {
 		Ks = 2.3;
 		alpha = 2.5;
 	};
-  
 
 	double lightDir[3];  // The direction of the light source
 	double Ka;           // The coefficient for ambient lighting.
 	double Kd;           // The coefficient for diffuse lighting.
 	double Ks;           // The coefficient for specular lighting.
 	double alpha;        // The exponent term for specular lighting.
-} LightingParameters;
+};
 
 LightingParameters lp;
 
@@ -365,30 +364,6 @@ class Triangle {
 	double findSlope(int side); // 1 is left side, 0 is right side
 };
 
-double calculateShading(LightingParameters &params, double *viewDirection, double *normal) {
-	return 0.5;
-}
-
-void shadeVertices(Triangle triangle, Camera camera, LightingParameters params) {
-	double viewDirection1[3] = { camera.position[0] - triangle.X[triangle.vertex1],
-								 camera.position[1] - triangle.Y[triangle.vertex1],
-								 camera.position[2] - triangle.Z[triangle.vertex1] };
-	double viewDirection2[3] = { camera.position[0] - triangle.X[triangle.vertex2],
-								 camera.position[1] - triangle.Y[triangle.vertex2],
-								 camera.position[2] - triangle.Z[triangle.vertex2] };
-	double viewDirection3[3] = { camera.position[0] - triangle.X[triangle.vertex3],
-								 camera.position[1] - triangle.Y[triangle.vertex3],
-								 camera.position[2] - triangle.Z[triangle.vertex3] };
-
-	double shading1 = calculateShading(&params, viewDirection1, triangle.normals);
-	double shading2 = calculateShading(&params, viewDirection2, triangle.normals);
-	double shading3 = calculateShading(&params, viewDirection3, triangle.normals);
-
-	triangle.shading[vertex1] = shading1;
-	triangle.shading[vertex2] = shading2;
-	triangle.shading[vertex3] = shading3;
-}
-
 void Triangle::findVertices() {
 	// Ethan Quick helped me by explaining the vertex sorting logic...
 	// I don't know if there's a better way to do it, but his explanation
@@ -550,6 +525,31 @@ void Screen::ImageColor(int row, int column, double z, double color[3]) {
 // ========================
 // Triangle-related methods 
 // ========================
+double calculateShading(double *viewDirection, double *normal) {
+	return 0.5;
+}
+
+void shadeVertices(Triangle *triangle, Camera camera) {
+	double viewDirection1[3] = { camera.position[0] - triangle->X[triangle->vertex1],
+								 camera.position[1] - triangle->Y[triangle->vertex2],
+								 camera.position[2] - triangle->Z[triangle->vertex3] };
+	double viewDirection2[3] = { camera.position[0] - triangle->X[triangle->vertex1],
+								 camera.position[1] - triangle->Y[triangle->vertex2],
+								 camera.position[2] - triangle->Z[triangle->vertex3] };
+	double viewDirection3[3] = { camera.position[0] - triangle->X[triangle->vertex1],
+								 camera.position[1] - triangle->Y[triangle->vertex2],
+								 camera.position[2] - triangle->Z[triangle->vertex3] };
+
+	double shading1 = calculateShading(viewDirection1, triangle->normals[triangle->vertex1]);
+	double shading2 = calculateShading(viewDirection2, triangle->normals[triangle->vertex2]);
+	double shading3 = calculateShading(viewDirection3, triangle->normals[triangle->vertex3]);
+
+	triangle->shading[triangle->vertex1] = shading1;
+	triangle->shading[triangle->vertex2] = shading2;
+	triangle->shading[triangle->vertex3] = shading3;
+}
+
+
 void rasterizeTriangle(Triangle triangle, Screen screen) {
 	// Get the vertices sorted before finding them
 	triangle.findVertices();
@@ -636,9 +636,14 @@ void rasterizeTriangle(Triangle triangle, Screen screen) {
 			// Color the pixels
 			double t = ((c - leftEnd) / (rightEnd - leftEnd));
 			double shading = leftShade + (t * (rightShade - leftShade));
-			double Colors[3] = { ceil_441(255 * min(shading * (ColorsLeft[0] + (t * (ColorsRight[0] - ColorsLeft[0]))), 1.0)),
-								 ceil_441(255 * min(shading * (ColorsLeft[1] + (t * (ColorsRight[1] - ColorsLeft[1]))), 1.0)),
-								 ceil_441(255 * min(shading * (ColorsLeft[2] + (t * (ColorsRight[2] - ColorsLeft[2]))), 1.0)) };
+			//cout << "shading is : " << shading << endl;
+			double Colors[3] = { min(shading * (ColorsLeft[0] + (t * (ColorsRight[0] - ColorsLeft[0]))), 1.0),
+								 min(shading * (ColorsLeft[1] + (t * (ColorsRight[1] - ColorsLeft[1]))), 1.0),
+								 min(shading * (ColorsLeft[2] + (t * (ColorsRight[2] - ColorsLeft[2]))), 1.0) };
+			//double Colors[3] = { ColorsLeft[0] + (t * (ColorsRight[0] - ColorsLeft[0])),
+			//					 ColorsLeft[1] + (t * (ColorsRight[1] - ColorsLeft[1])),
+			//					 ColorsLeft[2] + (t * (ColorsRight[2] - ColorsLeft[2])) };
+
 
 			double z = leftZ + (t * (rightZ - leftZ));
 
@@ -714,6 +719,17 @@ void drawTriangle(Triangle triangle, Screen screen) {
 			top.colors[2][1] = triangle.colors[vertex2][1]; // green
 			top.colors[2][2] = triangle.colors[vertex2][2]; // blue
 
+			// ---------------------------
+			// Set up the shading correctly
+			// top triangle - vertex 1 - color
+			top.shading[0] = triangle.shading[vertex1];
+
+			// top triangle - vertex 2 - color - INTERPOLATE
+			top.shading[1] = (triangle.shading[vertex1] + (topT * (triangle.shading[vertex3] - triangle.shading[vertex1])));
+
+			// top triangle - vertex 3 - color
+			top.shading[2] = triangle.shading[vertex2];
+
 			// ----------------+
 			// Bottom triangle |
 			// ----------------+
@@ -754,6 +770,17 @@ void drawTriangle(Triangle triangle, Screen screen) {
 			bottom.colors[2][0] = triangle.colors[vertex2][0]; // red
 			bottom.colors[2][1] = triangle.colors[vertex2][1]; // green
 			bottom.colors[2][2] = triangle.colors[vertex2][2]; // blue
+
+			// ---------------------------
+			// Set up the shading correctly
+			// bottom triangle - vertex 1 - color
+			bottom.shading[0] = triangle.shading[vertex3];
+
+			// top triangle - vertex 2 - color - INTERPOLATE
+			bottom.shading[1] = (triangle.shading[vertex1] + (bottomT * (triangle.shading[vertex3] - triangle.shading[vertex1])));
+
+			// top triangle - vertex 3 - color
+			bottom.shading[2] = triangle.shading[vertex2];
 
 			// -----------------------------------+
 			// Rasterize each individual triangle |
@@ -952,8 +979,6 @@ int main(int argc, char *argv[]) {
 	std::vector<Triangle> triangles = GetTriangles();
 
 	Screen screen = Screen(1000, 1000, buffer);
-	LightingParameters params;
-	params.LightingParameters();
 
 	int i;
 	for (i=0; i<1000; ++i) {
@@ -964,7 +989,7 @@ int main(int argc, char *argv[]) {
 
 		// Draw the triangles!
 		for (auto triangle : triangles) {
-			shadeVertices(triangle, camera, params);
+			shadeVertices(&triangle, camera);
 			transformToDevSpace(triangle, screen, camera);
 		}
 
@@ -972,5 +997,6 @@ int main(int argc, char *argv[]) {
 		char fileBuffer[50];
 		sprintf(fileBuffer, "frame%03d", i);
 		WriteImage(image, fileBuffer);
+		break;
 	}
 }
