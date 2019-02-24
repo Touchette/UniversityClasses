@@ -1,0 +1,22 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Utilities/DICOMParser/DICOMFile.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Utilities/DICOMParser/DICOMParser.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Utilities/DICOMParser/DICOMAppHelper.cxx"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"vtkDICOMParser"
+		],
+		"name" : "vtkDICOMParser"
+	}
+}

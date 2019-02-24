@@ -1,0 +1,130 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleDrawPolygon.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleFlight.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleImage.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleJoystickActor.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleJoystickCamera.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleMultiTouchCamera.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleRubberBand2D.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleRubberBand3D.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleRubberBandPick.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleRubberBandZoom.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleTerrain.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleTrackballActor.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleTrackballCamera.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleTrackball.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleUnicam.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleUser.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleSwitch.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkParallelCoordinatesInteractorStyle.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractionStyleObjectFactory.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleDrawPolygon.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleFlight.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleImage.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleJoystickActor.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleJoystickCamera.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleMultiTouchCamera.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleRubberBand2D.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleRubberBand3D.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleRubberBandPick.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleRubberBandZoom.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleTerrain.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleTrackballActor.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleTrackballCamera.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleTrackball.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleUnicam.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleUser.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractorStyleSwitch.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkParallelCoordinatesInteractorStyle.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractionStyleObjectFactory.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Interaction/Style/vtkInteractionStyleModule.h"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"vtkInteractionStyle"
+		],
+		"name" : "vtkInteractionStyle"
+	}
+}

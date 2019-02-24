@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/IO/Import/vtk3DSImporter.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/IO/Import/vtkImporter.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/IO/Import/vtkVRMLImporter.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/IO/Import/vtkOBJImporter.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/IO/Import/vtkOBJImporterInternals.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/IO/Import/vtk3DSImporter.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/IO/Import/vtkImporter.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/IO/Import/vtkVRMLImporter.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/IO/Import/vtkOBJImporter.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/IO/Import/vtkOBJImporterInternals.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/IO/Import/vtkIOImportModule.h"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"vtkIOImport"
+		],
+		"name" : "vtkIOImport"
+	}
+}

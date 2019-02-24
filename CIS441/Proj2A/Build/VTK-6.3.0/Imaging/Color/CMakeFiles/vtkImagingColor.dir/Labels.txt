@@ -1,0 +1,20 @@
+# Target labels
+ vtkImagingColor
+# Source files and their labels
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Color/vtkImageHSIToRGB.cxx
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Color/vtkImageHSVToRGB.cxx
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Color/vtkImageLuminance.cxx
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Color/vtkImageMapToRGBA.cxx
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Color/vtkImageMapToWindowLevelColors.cxx
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Color/vtkImageQuantizeRGBToIndex.cxx
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Color/vtkImageRGBToHSI.cxx
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Color/vtkImageRGBToHSV.cxx
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Color/vtkImageHSIToRGB.h
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Color/vtkImageHSVToRGB.h
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Color/vtkImageLuminance.h
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Color/vtkImageMapToRGBA.h
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Color/vtkImageMapToWindowLevelColors.h
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Color/vtkImageQuantizeRGBToIndex.h
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Color/vtkImageRGBToHSI.h
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Color/vtkImageRGBToHSV.h
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Color/vtkImagingColorModule.h

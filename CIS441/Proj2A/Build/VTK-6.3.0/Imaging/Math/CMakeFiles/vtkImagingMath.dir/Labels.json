@@ -1,0 +1,64 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Math/vtkImageDivergence.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Math/vtkImageDotProduct.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Math/vtkImageLogarithmicScale.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Math/vtkImageLogic.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Math/vtkImageMagnitude.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Math/vtkImageMaskBits.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Math/vtkImageMathematics.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Math/vtkImageWeightedSum.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Math/vtkImageDivergence.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Math/vtkImageDotProduct.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Math/vtkImageLogarithmicScale.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Math/vtkImageLogic.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Math/vtkImageMagnitude.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Math/vtkImageMaskBits.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Math/vtkImageMathematics.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Math/vtkImageWeightedSum.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Math/vtkImagingMathModule.h"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"vtkImagingMath"
+		],
+		"name" : "vtkImagingMath"
+	}
+}

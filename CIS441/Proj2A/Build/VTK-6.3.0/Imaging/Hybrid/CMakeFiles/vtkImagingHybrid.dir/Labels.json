@@ -1,0 +1,94 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkBooleanTexture.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkShepardMethod.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkVoxelModeller.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkSurfaceReconstructionFilter.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkFastSplatter.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkGaussianSplatter.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkCheckerboardSplatter.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkSampleFunction.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkPointLoad.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkImageCursor3D.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkImageRectilinearWipe.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkTriangularTexture.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkSliceCubes.cxx"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkBooleanTexture.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkShepardMethod.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkVoxelModeller.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkSurfaceReconstructionFilter.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkFastSplatter.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkGaussianSplatter.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkCheckerboardSplatter.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkSampleFunction.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkPointLoad.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkImageCursor3D.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkImageRectilinearWipe.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkTriangularTexture.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkSliceCubes.h"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Imaging/Hybrid/vtkImagingHybridModule.h"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"vtkImagingHybrid"
+		],
+		"name" : "vtkImagingHybrid"
+	}
+}

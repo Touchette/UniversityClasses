@@ -1,0 +1,29 @@
+# Target labels
+ vtkfreetype
+# Source files and their labels
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/base/ftbase.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/base/ftbbox.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/base/ftbitmap.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/base/ftglyph.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/base/ftinit.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/base/ftmm.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/bdf/bdf.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/cache/ftcache.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/cff/cff.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/cid/type1cid.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/gzip/ftgzip.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/lzw/ftlzw.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/pcf/pcf.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/pfr/pfr.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/psaux/psaux.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/pshinter/pshinter.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/psnames/psmodule.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/raster/raster.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/sfnt/sfnt.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/smooth/smooth.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/truetype/truetype.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/type1/type1.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/type42/type42.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/winfonts/winfnt.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/src/base/ftdebug.c
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/freetype/vtkfreetype/builds/unix/ftsystem.c

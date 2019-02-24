@@ -1,0 +1,9 @@
+# Target labels
+ vtkIOMovie
+# Source files and their labels
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/IO/Movie/vtkGenericMovieWriter.cxx
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/IO/Movie/vtkOggTheoraWriter.cxx
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/IO/Movie/vtkIOMovieConfigure.h
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/IO/Movie/vtkGenericMovieWriter.h
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/IO/Movie/vtkOggTheoraWriter.h
+/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/IO/Movie/vtkIOMovieModule.h

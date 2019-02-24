@@ -1,0 +1,1 @@
+/usr/bin/gcc-5 -fPIC   -w -w -g  -Wl,--no-undefined -lc   -shared -Wl,-soname,libvtkgl2ps-6.3.so.1 -o ../../../lib/libvtkgl2ps-6.3.so.1 CMakeFiles/vtkgl2ps.dir/gl2ps.c.o -Wl,-rpath,/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/lib: -lGL -lGLU -lm ../../../lib/libvtkpng-6.3.so.1 -lm ../../../lib/libvtkzlib-6.3.so.1 -lm 

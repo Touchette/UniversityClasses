@@ -1,0 +1,115 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libogg-1.1.4/src/framing.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libogg-1.1.4/src/bitwise.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/analyze.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/apiwrapper.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/bitpack.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/decapiwrapper.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/decinfo.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/decode.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/dequant.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/encapiwrapper.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/encfrag.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/encinfo.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/encode.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/enquant.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/fdct.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/fragment.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/huffdec.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/huffenc.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/idct.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/info.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/internal.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/mathops.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/mcenc.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/quant.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/rate.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/state.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/tokenize.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/x86/mmxencfrag.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/x86/mmxfdct.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/x86/mmxfrag.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/x86/mmxidct.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/x86/mmxstate.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/x86/x86enc.c"
+		},
+		{
+			"file" : "/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/ThirdParty/oggtheora/vtkoggtheora/libtheora-1.1.1/lib/x86/x86state.c"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"vtkoggtheora"
+		],
+		"name" : "vtkoggtheora"
+	}
+}
