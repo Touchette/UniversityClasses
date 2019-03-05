@@ -791,10 +791,10 @@ void drawTriangle(Triangle triangle, Screen screen) {
 			// bottom triangle - vertex 1 - color
 			bottom.shading[0] = triangle.shading[vertex3];
 
-			// top triangle - vertex 2 - color - INTERPOLATE
+			// bottom triangle - vertex 2 - color - INTERPOLATE
 			bottom.shading[1] = (triangle.shading[vertex1] + (bottomT * (triangle.shading[vertex3] - triangle.shading[vertex1])));
 
-			// top triangle - vertex 3 - color
+			// bottom triangle - vertex 3 - color
 			bottom.shading[2] = triangle.shading[vertex2];
 
 			// -----------------------------------+
