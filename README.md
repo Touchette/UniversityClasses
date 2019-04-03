@@ -16,3 +16,5 @@ uploaded follows.
 * Fall 2018 - Compiler Construction - Professor Michal Young
 # 2019
 * Winter 2019 - Introduction to Computer Graphics - Professor Hank Childs
+***
+* Spring 2019 - Operating Systems - Professor Allen Malony
