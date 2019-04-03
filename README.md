@@ -18,3 +18,4 @@ uploaded follows.
 * Winter 2019 - Introduction to Computer Graphics - Professor Hank Childs
 ***
 * Spring 2019 - Operating Systems - Professor Allen Malony
+* Spring 2019 - Introduction to Game Programming - Professor Eric Childs
