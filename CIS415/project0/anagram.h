@@ -2,9 +2,11 @@
 #define ANAGRAM_H
 
 #include <stdio.h>
+#include <ctype.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
+
 
 // +---------+
 // | Structs |
@@ -28,10 +30,10 @@ struct AnagramList {
 // Create a new string list node
 struct StringList *MallocSList(char *word);
 
-// Free a string list, including all children
+// Append a string list node to the end/tail of a string list
 void AppendSList(struct StringList **head, struct StringList *node);
 
-// Append a string list node to the end/tail of a string list
+// Free a string list, including all children
 void FreeSList(struct StringList **node);
 
 // Format output to a file according to a specification

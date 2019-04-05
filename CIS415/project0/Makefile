@@ -9,13 +9,10 @@ CFLAGS = -g -Wall
 all: anagram anagramtest
 
 anagram.o: anagram.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@ -I.
 
-main.o: main.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-anagram: anagram.o main.o
-	$(CC) -Wall $(LIBS) $^ -o $@
+anagram: anagram.o
+	$(CC) -Wall $(LIBS) $^ -o $@ -I.
 
 anagramtest: anagram.o test.o
 	$(CC) -Wall $(LIBS) $^ -o $@
