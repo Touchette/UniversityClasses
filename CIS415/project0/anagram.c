@@ -1,38 +1,44 @@
-#include "anagram.h"
-#include <stdlib.h>
+// +------------------------------------------+
+// | Name: Natalie Letz                       |
+// | Duck ID: nletz (#951463883)              |
+// | CIS 415 Project 0                        |
+// | This is my own work except that ...      |
+// |	The "ascending" function came from    |
+// |	StackOverflow. Find more info about   |
+// |	that attached to the function itself. |
+// +------------------------------------------+
 
-// I would be insane to not use bools thanks
+#include "anagram.h"
+
+// Just in case
 typedef enum { false, true } bool;
 
 typedef struct StringList StringList;
 typedef struct AnagramList AnagramList;
 
+// +----------------------+
+// | StringList Functions |
+// +----------------------+
+
 // Create a new string list node
 StringList *MallocSList(char *word) {
-	int i;
-	char *lowerWord = (char *) malloc(sizeof(char) * 256);
-	strcpy(lowerWord, word);
-
-	// After making a copy of the original word, turn it into
-	// lowercase by using the "tolower" builtin function
-	for (i=0; word[i]; ++i) {
-		lowerWord[i] = tolower(lowerWord[i]);
-	}
-
-	// Allocate a new list and its word, then copy the new
+	// Allocate a new list and its word, then copy the
 	// lowercase word into the StringList's word pointer
 	StringList *list = (StringList *) malloc(sizeof(*list));
-	list->Word = (char *) malloc(sizeof(char) * 256); strcpy(list->Word, lowerWord);
+	list->Word = (char *) malloc(sizeof(char) * (strlen(word) + 1)); 
+	strcpy(list->Word, word);
 	list->Next = NULL;
 
 	// Cleanup & Return
-	free(lowerWord);
-	lowerWord = 0;
 	return list;
 }
 
 // Append a string list node to the end/tail of a string list
 void AppendSList(StringList **head, StringList *node) {
+	while ((*head)->Next != NULL) {
+		head = &(*head)->Next;
+	}
+
 	(*head)->Next = node;
 }
 
@@ -55,7 +61,6 @@ void PrintSList(FILE *file, StringList *node) {
 		temp = node;
 		node = node->Next;
 		fprintf(file, "\t%s\n", temp->Word);
-		FreeSList(&node);
 	}
 }
 
@@ -71,68 +76,82 @@ int SListCount(struct StringList *node) {
 	return count;
 }
 
-// +-------------------+
-// | Anagram Functions |
-// +-------------------+
+// +-----------------------+
+// | AnagramList Functions |
+// +-----------------------+
 
-<<<<<<< HEAD
-=======
 // From StackOverflow user "R Sahu". You can find his post
 // related to sorting character arrays at the following link:
 // https://bit.ly/2UmU9oH
 // (I know how to use qsort in C, but I didn't write this function
 // myself. It is passed as the fourth argument to stdlib's qsort)
->>>>>>> 0fbee997... Clean up comments, refactor repo, change in/out
 int ascending(void const *a, void const *b) {
 	return (*(char *)a - *(char *)b);
 }
 
-// Create a new anagram node, including the string list node with the word.
-struct AnagramList *MallocAList(char *word) {
-	int numChars  = strlen(word);
-	char *anagram = (char *) malloc(sizeof(char) * 256);
+// Turns a word lowercase
+char *LowerCaser(char *word) {
+	int i;
+	char *lowerWord = (char *) malloc(sizeof(char) * (strlen(word) + 1));
+	strcpy(lowerWord, word);
 
-	// Sort the word and copy it for the anagram
+	// After making a copy of the original word, turn it into
+	// lowercase by using the "tolower" builtin function
+	for (i=0; word[i]; ++i) {
+		lowerWord[i] = tolower(lowerWord[i]);
+	}
+
+	return lowerWord;
+}
+
+// Turns a word into an anagram
+char *Anagramer(char *word) {
+	// Set up the new string and copy the old one into it
+	int numChars  = strlen(word);
+	char *anagram = (char *) malloc(sizeof(char) * (strlen(word) + 1));
 	strcpy(anagram, word);
+
+	// Sort the anagram
 	qsort(anagram, numChars, sizeof(char), ascending);
 
+	return anagram;
+}
+
+// Create a new anagram node, including the string list node with the word.
+struct AnagramList *MallocAList(char *word) {
 	// Allocate a new list and its word list pointer for use
 	// in setting up the anagram list
-	StringList  *strList = (StringList *) malloc(sizeof(*strList));
 	AnagramList *anaList = (AnagramList *) malloc(sizeof(*anaList));
+	// char *anagram = Anagramer(word);
 
 	// Setup the anagram list itself
-	anaList->Anagram = anagram;
-	anaList->Words   = strList;
+	anaList->Words   = MallocSList(word);
+	anaList->Anagram = Anagramer(LowerCaser(word));
 	anaList->Next    = NULL;
 
 	// Cleanup & Return
 	return anaList;
-	free(anagram); anagram = 0;
 }
 
+// Free an anagram list, including anagram children and string list words
 void FreeAList(struct AnagramList **node) {
 	AnagramList **temp;
 
-	while (node != NULL) {
+	while (*node != NULL) {
 		temp = node;
 		node = &(*node)->Next;
-		//FreeSList(*temp->Words);
+		FreeSList(&(*temp)->Words);
 		free(*temp); temp = 0;
 	}
 }
 
+// Format output to a file, print anagram list with words, according to spec
 void PrintAList(FILE *file, struct AnagramList *node) {
 	AnagramList *temp;
 
 	while (node != NULL) {
 		temp = node;
 		node = node->Next;
-<<<<<<< HEAD
-		fprintf(file, "%s\n", temp->Anagram);
-		//PrintSList(file, temp->Words);
-		//FreeAList(&node);
-=======
 		int numWords = SListCount(temp->Words);
 		if (numWords > 0) {
 			fprintf(file, "%s: %d\n", temp->Anagram, numWords);
@@ -163,18 +182,10 @@ void AddWordAList(struct AnagramList **node, char *word) {
 		if (!found) {
 			old->Next = MallocAList(word);
 		}
->>>>>>> 0fbee997... Clean up comments, refactor repo, change in/out
 	}
 }
 
 int main(int argc, char *argv[]) {
-<<<<<<< HEAD
-	AnagramList *test = MallocAList("hello");
-	PrintAList(stdout, test);
-	free(test); test = 0;
-
-	FILE *inFile  = stdin;
-=======
 	// Initialize everything we're going to need to read the lines from the
 	// file
 	AnagramList *node = NULL;
@@ -186,34 +197,15 @@ int main(int argc, char *argv[]) {
 	// It gets a ton of errors if I try using stdin and stdout. This basically
 	// makes it so that it requires files to work
 	FILE *inFile = stdin;
->>>>>>> 0fbee997... Clean up comments, refactor repo, change in/out
 	FILE *outFile = stdout;
 
 	if (!(inFile = fopen(argv[1], "r"))) {
-		fprintf(stderr, "No specified input file; exiting\n");
-		exit(EXIT_FAILURE);
+		fprintf(stderr, "No specified input file; using stdin\n");
 	}
 	if (!(outFile = fopen(argv[2], "w"))) {
-		fprintf(stderr, "No specified output file; exiting\n");
-		exit(EXIT_FAILURE);
+		fprintf(stderr, "No specified output file; using stdout\n");
 	}
 
-<<<<<<< HEAD
-	fprintf(outFile, "dgo : 2\n");
-
-	// test malloc of the string lists
-	char word[4]  = {'D', 'O', 'G', '\0'};
-	char word2[4] = {'G', 'O', 'D', '\0'};
-	StringList *list1 = MallocSList(word);
-	StringList *list2 = MallocSList(word2);
-
-	// test append
-	AppendSList(&list1, list2);
-
-	// test loop for printing and freeing the lists
-	PrintSList(outFile, list1);
-
-=======
 	// Make sure to trim newlines from the input lines or else it's totally
 	// messed up.
     while ((read = getline(&line, &len, inFile)) != -1) {
@@ -235,7 +227,6 @@ int main(int argc, char *argv[]) {
 
 	// Free up the final line used for reading
 	free(line);
->>>>>>> 0fbee997... Clean up comments, refactor repo, change in/out
 	// close file
 	if (inFile && outFile) {
 		fclose(inFile);
@@ -244,4 +235,3 @@ int main(int argc, char *argv[]) {
 
 	return 0;
 }
-
