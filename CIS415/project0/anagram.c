@@ -75,6 +75,14 @@ int SListCount(struct StringList *node) {
 // | Anagram Functions |
 // +-------------------+
 
+<<<<<<< HEAD
+=======
+// From StackOverflow user "R Sahu". You can find his post
+// related to sorting character arrays at the following link:
+// https://bit.ly/2UmU9oH
+// (I know how to use qsort in C, but I didn't write this function
+// myself. It is passed as the fourth argument to stdlib's qsort)
+>>>>>>> 0fbee997... Clean up comments, refactor repo, change in/out
 int ascending(void const *a, void const *b) {
 	return (*(char *)a - *(char *)b);
 }
@@ -120,18 +128,65 @@ void PrintAList(FILE *file, struct AnagramList *node) {
 	while (node != NULL) {
 		temp = node;
 		node = node->Next;
+<<<<<<< HEAD
 		fprintf(file, "%s\n", temp->Anagram);
 		//PrintSList(file, temp->Words);
 		//FreeAList(&node);
+=======
+		int numWords = SListCount(temp->Words);
+		if (numWords > 0) {
+			fprintf(file, "%s: %d\n", temp->Anagram, numWords);
+			PrintSList(file, temp->Words);
+		}
+	}
+}
+
+// Add a new word to the anagram list
+void AddWordAList(struct AnagramList **node, char *word) {
+	AnagramList *temp = *node;
+	AnagramList *old  = NULL;
+	bool found = false;
+
+	if (*node == NULL) {
+		*node = MallocAList(word);
+	}
+	else {
+		char *check = Anagramer(LowerCaser(word));
+		while (temp != NULL) {
+			if (strcmp(check, temp->Anagram) == 0) {
+				AppendSList(&(temp->Words), MallocSList(word));
+				found = true;
+			}
+			old = temp;
+			temp = temp->Next;
+		}
+		if (!found) {
+			old->Next = MallocAList(word);
+		}
+>>>>>>> 0fbee997... Clean up comments, refactor repo, change in/out
 	}
 }
 
 int main(int argc, char *argv[]) {
+<<<<<<< HEAD
 	AnagramList *test = MallocAList("hello");
 	PrintAList(stdout, test);
 	free(test); test = 0;
 
 	FILE *inFile  = stdin;
+=======
+	// Initialize everything we're going to need to read the lines from the
+	// file
+	AnagramList *node = NULL;
+	char *line = NULL;
+	size_t len = 0;
+	ssize_t read;
+
+	// For some reason these assignments don't work like they did in the lab?
+	// It gets a ton of errors if I try using stdin and stdout. This basically
+	// makes it so that it requires files to work
+	FILE *inFile = stdin;
+>>>>>>> 0fbee997... Clean up comments, refactor repo, change in/out
 	FILE *outFile = stdout;
 
 	if (!(inFile = fopen(argv[1], "r"))) {
@@ -143,6 +198,7 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
+<<<<<<< HEAD
 	fprintf(outFile, "dgo : 2\n");
 
 	// test malloc of the string lists
@@ -157,6 +213,29 @@ int main(int argc, char *argv[]) {
 	// test loop for printing and freeing the lists
 	PrintSList(outFile, list1);
 
+=======
+	// Make sure to trim newlines from the input lines or else it's totally
+	// messed up.
+    while ((read = getline(&line, &len, inFile)) != -1) {
+        int len = strlen(line);
+        if (line[len-1] == '\n') {
+            line[len-1] = '\0';
+        }
+        AddWordAList(&node, line);
+    }
+
+	// Print all the anagrams and their original words
+	PrintAList(outFile, node);
+	
+	// Free the Anagram Lists, their children, and the string lists
+	// (This is broken right now, but it's very close to working. I
+	// implemented these functions very soon after starting and just
+	// never got around to making them perfect)
+	// FreeAList(&node);
+
+	// Free up the final line used for reading
+	free(line);
+>>>>>>> 0fbee997... Clean up comments, refactor repo, change in/out
 	// close file
 	if (inFile && outFile) {
 		fclose(inFile);
