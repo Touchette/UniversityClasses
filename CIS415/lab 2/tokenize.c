@@ -10,8 +10,6 @@
  *     1. I didn't understand quite how to use getline() and still
  *     have the ">>> " appear before user input as if I were using
  *     scanf(), so it just outputs it in the while loop (quite ugly)
- *     and thus the ">>> " is printed for each line in the terminal
- *     even when using an input file.
  */
 
 #include <string.h>
@@ -41,7 +39,7 @@ int main(int argc, char *argv[]) {
 	outstream = stdout;
 	if (argc > 1) {
 		instream = fopen(argv[1], "r");
-		outstream = fopen("pseduoshell_output.txt", "w");
+		outstream = fopen("pseudoshell_output.txt", "w");
 		if (instream == NULL || outstream == NULL) {
 			perror("fopen");
 			exit(1);
@@ -50,7 +48,8 @@ int main(int argc, char *argv[]) {
 
 	/* Main run loop */
 	int i = 0;
-	while ((printf(">>> ")) && (nread = getline(&line, &len, instream)) != -1) {
+	while (((outstream == stdout) ? printf(">>> ") : 1) 
+		&& (nread = getline(&line, &len, instream)) != -1) {
 		// Tokenize the input string
 		token = strtok(line, delimiter);
 
