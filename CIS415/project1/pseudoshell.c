@@ -97,7 +97,7 @@ int ls_wrapper(int dirfd, const char *pathname, FILE *dest)
 			}
 
 			bpos += d->d_reclen;
-			}
+		}
 	} while (getdents_res != 0);
 	
 	fprintf(dest, "\n");
