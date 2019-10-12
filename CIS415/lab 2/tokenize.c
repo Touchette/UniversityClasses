@@ -67,11 +67,7 @@ int main(int argc, char *argv[]) {
 		// Given output has a newline before displaying the tokens
 		printf("\n");
 		while (token != NULL) {
-			if (outstream != NULL) {
-				fprintf(outstream, "T%d: %s\n", i, token);
-			} else {
-				printf("T%d: %s\n", i, token);
-			}
+			fprintf(outstream, "T%d: %s\n", i, token);
 
 			token = strtok(NULL, delimiter);
 			i++;
