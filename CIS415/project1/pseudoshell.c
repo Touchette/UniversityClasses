@@ -79,25 +79,25 @@ int ls_wrapper(int dirfd, const char *pathname, FILE *dest)
 		for (int bpos = 0; bpos < getdents_res;)
 		{
 			// ???
-            d = (struct linux_dirent *) (buffer + bpos);
-            d_type = *(buffer + bpos + d->d_reclen - 1);
+			d = (struct linux_dirent *) (buffer + bpos);
+			d_type = *(buffer + bpos + d->d_reclen - 1);
 
-            // Printing the names
-            if (d_type != DT_DIR)
-            {
-            	fprintf(dest, "%s ", d->d_name);
-            }
-            else
-            {
-            	// Make sure not to print the current directory or the parent directory
-            	if ((strcmp(d->d_name, ".") != 0) && (strcmp(d->d_name, "..") != 0))
-            	{
-            		fprintf(dest, "\e[1m%s\e[0m ", d->d_name); 
-            	}
-            }
+			// Printing the names
+			if (d_type != DT_DIR)
+			{
+				fprintf(dest, "%s ", d->d_name);
+			}
+			else
+			{
+				// Make sure not to print the current directory or the parent directory
+				if ((strcmp(d->d_name, ".") != 0) && (strcmp(d->d_name, "..") != 0))
+				{
+					fprintf(dest, "\e[1m%s\e[0m ", d->d_name); 
+				}
+			}
 
-            bpos += d->d_reclen;
-		}
+			bpos += d->d_reclen;
+			}
 	} while (getdents_res != 0);
 	
 	fprintf(dest, "\n");
