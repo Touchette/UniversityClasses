@@ -27,7 +27,8 @@
 
 // Used for the ls_wrapper function for the getdents syscall
 // to work for printing... no idea what's going on tho
-struct linux_dirent {
+struct linux_dirent
+{
     long           d_ino;
     off_t          d_off;
     unsigned short d_reclen;
@@ -102,11 +103,13 @@ int ls_wrapper(int dirfd, const char *pathname, FILE *dest)
 	
 	fprintf(dest, "\n");
 
+	// Cleanup
 	free(buffer);
 	return 0;
 }
 
-int pwd_wrapper(FILE *dest) {
+int pwd_wrapper(FILE *dest)
+{
 	char *cwd_buffer = malloc(sizeof(char) * BUF_SIZE);
 	int getcwd_res, write_res, buffer_len;
 
@@ -118,7 +121,59 @@ int pwd_wrapper(FILE *dest) {
 	// Write it out to the file
 	write_res = syscall(SYS_write, fileno(dest), cwd_buffer, buffer_len + 1);
 
+	// Error handling
+	if (getcwd_res == -1)
+	{
+		handle_error(errno, "getcwd");
+	}
+	if (write_res == -1) 
+	{
+		handle_error(errno, "write");
+	}
+
+	// Cleanup
 	free(cwd_buffer);
+	return 0;
+}
+
+int cd_wrapper(const char *path, FILE *dest)
+{
+	char *cwd = malloc(sizeof(char) * BUF_SIZE);
+	int chdir_res, write_res, cwd_len;
+
+	// Constructing the relative path if we need to
+	if (path[0] != '/')
+	{
+		cwd = getcwd(cwd, BUF_SIZE);
+		strcat(cwd, "/");
+		strcat(cwd, path);
+		chdir_res = syscall(SYS_chdir, cwd);
+		cwd_len = strlen(cwd);
+	}
+	// Otherwise we were given an absolute path, do it
+	// directly
+	else
+	{
+		chdir_res = syscall(SYS_chdir, path);
+		cwd_len = strlen(path);
+	}
+	
+	// Write the output (the new directory we are in)
+	cwd[cwd_len] = '\n';
+	write_res = syscall(SYS_write, fileno(dest), cwd, cwd_len + 1);
+
+	// Error handling
+	if (chdir_res == -1)
+	{
+		handle_error(errno, "chdir");
+	}
+	if (write_res == -1) 
+	{
+		handle_error(errno, "write");
+	}
+
+	// Cleanup
+	free(cwd);
 	return 0;
 }
 
@@ -182,13 +237,15 @@ int main(int argc, char *argv[])
 		while (token != NULL) 
 		{
 			// Carry on if we get a semicolon in the wild
-			if (strcmp(token, ";") == 0) {
+			if (strcmp(token, ";") == 0)
+			{
 				token = strtok(NULL, delimiter);
 				continue;
 			}
 
 			// Handle "ls"
-			else if (strcmp(token, "ls") == 0) {
+			else if (strcmp(token, "ls") == 0)
+			{
 				ls_wrapper(AT_FDCWD, ".", outstream);
 			}
 
@@ -196,6 +253,28 @@ int main(int argc, char *argv[])
 			else if (strcmp(token, "pwd") == 0) 
 			{
 				pwd_wrapper(outstream);
+			}
+
+			// Handle "cd"
+			else if (strcmp(token, "cd") == 0)
+			{
+				int argcount = 0;
+				while (token != NULL && argcount < 2)
+				{
+					if (strcmp(token, ";") == 0)
+					{
+						break;
+					}
+					if (strcmp(token, "cd") == 0)
+					{
+						token = strtok(NULL, delimiter);
+						argcount++;
+						continue;
+					}
+
+					cd_wrapper(token, outstream);
+					argcount++;
+				}
 			}
 			
 			// Clean up
@@ -212,4 +291,4 @@ int main(int argc, char *argv[])
 	}
 
 	return 0;
-}
+} 
