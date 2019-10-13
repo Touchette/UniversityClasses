@@ -1,5 +1,6 @@
 /*
- * Description: a very basic bash emulator that can simulate a few
+ * Description:
+ * A very basic bash emulator that can simulate a few
  * commands
  *
  * Author: Natalie Letz #951463883
@@ -45,7 +46,7 @@ int handle_error(int err, const char *callname)
 	return 1;
 }
 
-int ls_wrapper(int dirfd, const char *pathname, FILE *dest) 
+int ls_wrapper(FILE *dest) 
 {
 	char *buffer = malloc(sizeof(char) * BUF_SIZE);
 	int openat_res, getdents_res;
@@ -53,7 +54,7 @@ int ls_wrapper(int dirfd, const char *pathname, FILE *dest)
 	char d_type;
 
 	// Open the filepath
-	openat_res = syscall(SYS_openat, dirfd, ".", O_DIRECTORY);
+	openat_res = syscall(SYS_openat, AT_FDCWD, ".", O_DIRECTORY);
 
 	// Handle errors if there are any
 	if (openat_res == -1) 
@@ -136,12 +137,27 @@ int pwd_wrapper(FILE *dest)
 	return 0;
 }
 
+int mkdir_wrapper(const char *name, FILE *dest)
+{
+	int mkdir_res;
+	mode_t mode = (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IROTH);
+
+	mkdir_res = syscall(SYS_mkdir, name, mode);
+
+	if (mkdir_res == -1)
+	{
+		handle_error(errno, "mkdir");
+	}
+
+	return 0;
+}
+
 int cd_wrapper(const char *path, FILE *dest)
 {
 	char *cwd = malloc(sizeof(char) * BUF_SIZE);
 	int chdir_res, write_res, cwd_len;
 
-	// Constructing the relative path if we need to
+	// Constructing the absolute path if we need to
 	if (path[0] != '/')
 	{
 		cwd = getcwd(cwd, BUF_SIZE);
@@ -177,6 +193,53 @@ int cd_wrapper(const char *path, FILE *dest)
 	return 0;
 }
 
+int cp_wrapper(char *srcpath, char *destpath)
+{
+
+	return 0;
+}
+
+int mv_wrapper(char *srcpath, char *destpath) 
+{
+
+	return 0;
+}
+
+int rm_wrapper(char *filename)
+{
+	int unlink_res;
+	char *path = malloc(sizeof(char) * BUF_SIZE);
+	char *cwd  = malloc(sizeof(char) * BUF_SIZE);
+
+	if (filename[0] != '/')
+	{
+		cwd = getcwd(cwd, BUF_SIZE);
+		strcat(path, "/");
+		strcat(path, cwd);
+		strcat(path, filename);
+		unlink_res = syscall(SYS_unlink, filename);
+	}
+	else
+	{
+		unlink_res = syscall(SYS_unlink, filename);
+	}
+
+	if (unlink_res == -1)
+	{
+		handle_error(errno, "unlink");
+	}
+
+	free(cwd);
+	free(path);
+	return 0;
+}
+
+int cat_wrapper(char *filename)
+{
+
+	return 0;
+}
+
 int main(int argc, char *argv[]) 
 {
 	setbuf(stdout, NULL);
@@ -206,7 +269,7 @@ int main(int argc, char *argv[])
 		if (instream == NULL || outstream == NULL) 
 		{
 			perror("fopen");
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 	}
 
@@ -217,8 +280,7 @@ int main(int argc, char *argv[])
 		// Tokenize the input string
 		token = strtok(line, delimiter);
 
-		// Exit successfully if we get an exit command, do nothing if we
-		// get empty input
+		// Exit successfully if we get an exit command
 		if (token != NULL) 
 		{
 			if (strcmp(token, "exit") == 0) 
@@ -226,7 +288,8 @@ int main(int argc, char *argv[])
 				fprintf(outstream, "\n");
 				break;
 			}
-		} 
+		}
+		// Do nothing if we get empty input
 		else
 		{
 			continue;
@@ -246,13 +309,35 @@ int main(int argc, char *argv[])
 			// Handle "ls"
 			else if (strcmp(token, "ls") == 0)
 			{
-				ls_wrapper(AT_FDCWD, ".", outstream);
+				ls_wrapper(outstream);
 			}
 
 			// Handle "pwd"
 			else if (strcmp(token, "pwd") == 0) 
 			{
 				pwd_wrapper(outstream);
+			}
+
+			// Handle "mkdir"
+			else if (strcmp(token, "mkdir") == 0)
+			{
+				int argcount = 0;
+				while (token != NULL && argcount < 2)
+				{
+					if (strcmp(token, ";") == 0)
+					{
+						break;
+					}
+					if (strcmp(token, "mkdir") == 0)
+					{
+						token = strtok(NULL, delimiter);
+						argcount++;
+						continue;
+					}
+
+					mkdir_wrapper(token, outstream);
+					argcount++;
+				}
 			}
 
 			// Handle "cd"
@@ -275,6 +360,33 @@ int main(int argc, char *argv[])
 					cd_wrapper(token, outstream);
 					argcount++;
 				}
+			}
+
+			// Handle "rm"
+			else if (strcmp(token, "rm") == 0)
+			{
+				int argcount = 0;
+				while (token != NULL && argcount < 2)
+				{
+					if (strcmp(token, ";") == 0)
+					{
+						break;
+					}
+					if (strcmp(token, "rm") == 0)
+					{
+						token = strtok(NULL, delimiter);
+						argcount++;
+						continue;
+					}
+
+					rm_wrapper(token);
+					argcount++;
+				}
+			}
+
+			else
+			{
+				fprintf(stderr, "Unrecognized command: %s\n", token);
 			}
 			
 			// Clean up
