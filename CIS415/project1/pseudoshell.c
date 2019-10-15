@@ -284,10 +284,13 @@ void moveFile(char *sourcePath, char *destinationPath)
 
 	int rename_res = 0;
 
+	// Rename will actually move a file directories if it needs to...
+	// ... good thing I did all the work up there to get full pathnames
 	rename_res = syscall(SYS_rename, sourcePath_buffer, destinationPath_buffer);
 	handleError(rename_res, "rename");
 
 
+	// Cleanup
 	free(destination_filename);
 	free(sourcePath_buffer);
 	free(destinationPath_buffer);
@@ -391,6 +394,7 @@ void one_arg_wrapper(char *token, char *function)
 		changeDir(arg1);
 	}
 
+	// Cleanup
 	free(arg1);
 }
 
@@ -419,6 +423,8 @@ void two_arg_wrapper(char *token, char *function)
 			continue;
 		}
 
+		// Grab the first argument when we find it if we haven't
+		// yet goten it
 		if (token && (strlen(arg1) == 0))
 		{
 			strcpy(arg1, token);
@@ -427,6 +433,7 @@ void two_arg_wrapper(char *token, char *function)
 			continue;
 		}
 
+		// Grab the other argument
 		strcpy(arg2, token);
 		argcount++;
 	}
