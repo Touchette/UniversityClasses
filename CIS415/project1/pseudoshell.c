@@ -68,25 +68,6 @@ char * createAbsPath(const char *path)
 	return cwd;
 }
 
-char * constructPath(char *path)
-{
-	char *newPath = malloc(sizeof(char) * BUF_SIZE);
-	strcpy(newPath, path);
-
-	// Constructing the absolute path if we need to
-	if (path[0] != '/')
-	{
-		newPath = createAbsPath(path);
-		return newPath;
-	}
-	else {
-		free(newPath);
-		return path;
-	}
-
-	return "constructPath bug.\n";
-}
-
 void listDir() 
 {
 	char *buffer = malloc(sizeof(char) * BUF_SIZE);
