@@ -13,6 +13,7 @@
 
 #include <sys/syscall.h>
 #include <sys/types.h>
+#include "command.h"
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -22,8 +23,10 @@
 #include <errno.h>
 #include <fcntl.h>
 
+// Some constants used in various functions
 #define AT_FDCWD -100
 #define BUF_SIZE 1024
+#define CAT_BUF 1048576
 
 
 // Used for the ls_wrapper function for the getdents syscall
@@ -36,41 +39,58 @@ struct linux_dirent
     char           d_name[];
 };
 
-int handle_error(int err, const char *callname) 
+int handleError(int res, const char *callname) 
 {
-	// Get the errno so I can reference the documentation
-	fprintf(stderr, "Error in %s: %d. Problem:\n\t", callname, err);
-	// Get the error output that C provides for more clues
-	perror(callname);
+	if (res == -1)
+	{
+		// Get the errno so I can reference the documentation
+		fprintf(stderr, "Error in %s: %d. Problem:\n\t", callname, errno);
+		// Get the error output that C provides for more clues
+		perror(callname);
 
-	return 1;
+		return -1;
+	}
+
+	return 0;
 }
 
-int ls_wrapper(FILE *dest) 
+char * createAbsPath(const char *path)
+{
+	// Caller needs to free this
+	char *cwd = malloc(sizeof(char) * BUF_SIZE);
+	
+	// Just build the path... kinda self explanatory
+	cwd = getcwd(cwd, BUF_SIZE);
+	strcat(cwd, "/");
+	strcat(cwd, path);
+
+	return cwd;
+}
+
+void listDir() 
 {
 	char *buffer = malloc(sizeof(char) * BUF_SIZE);
-	int openat_res, getdents_res;
+	int openat_res, write_res, getdents_res = 0;
 	struct linux_dirent *d;
 	char d_type;
 
 	// Open the filepath
 	openat_res = syscall(SYS_openat, AT_FDCWD, ".", O_DIRECTORY);
 
-	// Handle errors if there are any
-	if (openat_res == -1) 
+	// Handle openat errors if there are any and prematurely exit
+	if ((handleError(openat_res, "openat")) == -1)
 	{
-		handle_error(errno, "openat");
-		return openat_res;
+		free(buffer);
+		return;
 	}
 
 	do 
 	{
 		// Make sure to check for errors at the start of every
 		// loop, it can't be -1 on the first loop so this is fine
-		if (getdents_res == -1) 
+		if (handleError(getdents_res, "getdents") == -1)
 		{
-			handle_error(errno, "getdents");
-			return getdents_res;
+			break;
 		}
 
 		// Scan the filepath for files
@@ -84,167 +104,193 @@ int ls_wrapper(FILE *dest)
 			d = (struct linux_dirent *) (buffer + bpos);
 			d_type = *(buffer + bpos + d->d_reclen - 1);
 
-			// Printing the names
-			if (d_type != DT_DIR)
+			// Make sure not to print the current directory or the parent directory
+			if ((strcmp(d->d_name, ".") != 0) && (strcmp(d->d_name, "..") != 0))
 			{
-				fprintf(dest, "%s ", d->d_name);
-			}
-			else
-			{
-				// Make sure not to print the current directory or the parent directory
-				if ((strcmp(d->d_name, ".") != 0) && (strcmp(d->d_name, "..") != 0))
-				{
-					fprintf(dest, "\e[1m%s\e[0m ", d->d_name); 
-				}
+				write_res = syscall(SYS_write, fileno(stdout), strcat(d->d_name, " "), strlen(d->d_name) + 1);
+				handleError(write_res, "write");
 			}
 
 			bpos += d->d_reclen;
 		}
 	} while (getdents_res != 0);
 	
-	fprintf(dest, "\n");
+	// Print the final newline and check for errors one last time
+	write_res = syscall(SYS_write, fileno(stdout), "\n", sizeof(char));
+	handleError(write_res, "write");
 
 	// Cleanup
 	free(buffer);
-	return 0;
 }
 
-int pwd_wrapper(FILE *dest)
+void showCurrentDir()
 {
 	char *cwd_buffer = malloc(sizeof(char) * BUF_SIZE);
-	int getcwd_res, write_res, buffer_len;
+	int getcwd_res, write_res, cwd_len = 0;
 
-	// Get the string that is the current directory name
+	// Get the string that is the current directory name and
+	// handle its errors
 	getcwd_res = syscall(SYS_getcwd, cwd_buffer, BUF_SIZE);
-	buffer_len = strlen(cwd_buffer);
-	cwd_buffer[buffer_len] = '\n';
+	handleError(getcwd_res, "getcwd");
 
-	// Write it out to the file
-	write_res = syscall(SYS_write, fileno(dest), cwd_buffer, buffer_len + 1);
+	// Create the writeable string
+	cwd_len = strlen(cwd_buffer);
+	cwd_buffer[cwd_len] = '\n';
 
-	// Error handling
-	if (getcwd_res == -1)
-	{
-		handle_error(errno, "getcwd");
-	}
-	if (write_res == -1) 
-	{
-		handle_error(errno, "write");
-	}
+	// Write it out to the file and handle its errors
+	write_res = syscall(SYS_write, fileno(stdout), cwd_buffer, cwd_len + 1);
+	handleError(write_res, "write");
 
 	// Cleanup
 	free(cwd_buffer);
-	return 0;
 }
 
-int mkdir_wrapper(const char *name, FILE *dest)
+void makeDir(char *dirName)
 {
-	int mkdir_res;
 	mode_t mode = (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IROTH);
+	int mkdir_res = 0;
 
-	mkdir_res = syscall(SYS_mkdir, name, mode);
-
-	if (mkdir_res == -1)
-	{
-		handle_error(errno, "mkdir");
-	}
-
-	return 0;
+	// Create a folder with a mode that allows all users to read to it
+	// and write to it, handle its errors
+	mkdir_res = syscall(SYS_mkdir, dirName, mode);
+	handleError(mkdir_res, "mkdir");
 }
 
-int cd_wrapper(const char *path, FILE *dest)
+void changeDir(char *dirName)
 {
-	char *cwd = malloc(sizeof(char) * BUF_SIZE);
-	int chdir_res, write_res, cwd_len;
+	char *cwd = NULL;
+	int chdir_res = 0;
 
 	// Constructing the absolute path if we need to
-	if (path[0] != '/')
+	if (dirName[0] != '/')
 	{
-		cwd = getcwd(cwd, BUF_SIZE);
-		strcat(cwd, "/");
-		strcat(cwd, path);
+		cwd = createAbsPath(dirName);
 		chdir_res = syscall(SYS_chdir, cwd);
-		cwd_len = strlen(cwd);
 	}
-	// Otherwise we were given an absolute path, do it
-	// directly
+	// Otherwise we were given an absolute path, do it directly
 	else
 	{
-		chdir_res = syscall(SYS_chdir, path);
-		cwd_len = strlen(path);
+		chdir_res = syscall(SYS_chdir, dirName);
 	}
-	
-	// Write the output (the new directory we are in)
-	cwd[cwd_len] = '\n';
-	write_res = syscall(SYS_write, fileno(dest), cwd, cwd_len + 1);
 
-	// Error handling
-	if (chdir_res == -1)
-	{
-		handle_error(errno, "chdir");
-	}
-	if (write_res == -1) 
-	{
-		handle_error(errno, "write");
-	}
+	// Handle chdir errors
+	handleError(chdir_res, "chdir");
 
 	// Cleanup
 	free(cwd);
-	return 0;
 }
 
-int cp_wrapper(char *srcpath, char *destpath)
+void copyFile(char *sourcePath, char *destinationPath)
 {
 
-	return 0;
 }
 
-int mv_wrapper(char *srcpath, char *destpath) 
+void moveFile(char *sourcePath, char *destinationPath) 
 {
 
-	return 0;
 }
 
-int rm_wrapper(char *filename)
+void deleteFile(char *filename)
 {
-	int unlink_res;
-	char *path = malloc(sizeof(char) * BUF_SIZE);
-	char *cwd  = malloc(sizeof(char) * BUF_SIZE);
+	char *cwd;
+	int unlink_res = 0;
 
+	// Constructing absolute path to the file if needed
 	if (filename[0] != '/')
 	{
-		cwd = getcwd(cwd, BUF_SIZE);
-		strcat(path, "/");
-		strcat(path, cwd);
-		strcat(path, filename);
-		unlink_res = syscall(SYS_unlink, filename);
+		cwd = createAbsPath(filename);
+		unlink_res = syscall(SYS_unlink, cwd);
 	}
+	// Otherwise just delete it
 	else
 	{
 		unlink_res = syscall(SYS_unlink, filename);
 	}
 
-	if (unlink_res == -1)
-	{
-		handle_error(errno, "unlink");
-	}
+	// Handle errors
+	handleError(unlink_res, "unlink");
 
+	// Cleanup
 	free(cwd);
-	free(path);
-	return 0;
 }
 
-int cat_wrapper(char *filename)
+void displayFile(char *filename)
 {
+	char *cat_buffer = malloc(sizeof(char) * CAT_BUF);
+	mode_t mode = (S_IRUSR | S_IRGRP | S_IROTH); 
+	int cat_res, open_res, write_res, cat_len = 0;
 
-	return 0;
+	// Open the file, handle any errors
+	open_res = syscall(SYS_open, filename, O_RDONLY, mode);
+	handleError(open_res, "open");
+
+	// Read the file into the buffer for printing, handle any
+	// errors
+	cat_res = syscall(SYS_read, open_res, cat_buffer, CAT_BUF);
+	handleError(cat_res, "read");
+
+	// Make the string writeable
+	cat_len = strlen(cat_buffer);
+	cat_buffer[cat_len] = '\n';
+
+	// Create the writeable string and write it out, handle any errors
+	write_res = syscall(SYS_write, fileno(stdout), cat_buffer, cat_len + 1);
+	handleError(write_res, "write");
+
+	// Cleanup
+	free(cat_buffer);
+	close(open_res);
+}
+
+void one_arg_wrapper(char *token, char *function)
+{
+	// Need the delimiter here as well, argcount keeps track
+	// of how many args we have so if we get more than the
+	// correct amount we can break out
+	const char *delimiter = " \t\n\f\r\v";
+	int argcount = 0;
+
+	while (token != NULL && argcount < 2)
+	{
+		// Handle a control char, break out when we reach one
+		if (strcmp(token, ";") == 0)
+		{
+			break;
+		}
+		// One of the tokens is the function name... skip it
+		if (strcmp(token, function) == 0)
+		{
+			token = strtok(NULL, delimiter);
+			argcount++;
+			continue;
+		}
+
+		// Handle all the function calls
+		if (strcmp(function, "mkdir") == 0 )
+		{
+			makeDir(token);
+		}
+		else if (strcmp(function, "cat") == 0)
+		{
+			displayFile(token);
+		}
+		else if (strcmp(function, "rm") == 0)
+		{
+			deleteFile(token);
+		}
+		else if (strcmp(function, "cd") == 0)
+		{
+			changeDir(token);
+		}
+
+		argcount++;
+	}
 }
 
 int main(int argc, char *argv[]) 
 {
 	setbuf(stdout, NULL);
 
-	/* Main function variables & allocation of memory for input */
 	// Delimiter & token pointer to be used by strotok()
 	const char *delimiter = " \t\n\f\r\v";
 	char *token;
@@ -255,26 +301,55 @@ int main(int argc, char *argv[])
 	FILE *outstream;
 
 	// The variables used for getline() calls
-	char *line = 0;
-	size_t len = 0;
+	int changed = 0;
+	char *line  = 0;
+	size_t len  = 0;
 	ssize_t nread;
 
-	// Setting up the streams
+	// Setting up the streams and flags for the shell
 	instream  = stdin;
 	outstream = stdout;
 	if (argc > 1) 
 	{
-		instream = fopen(argv[1], "r");
-		outstream = fopen("pseudoshell_output.txt", "w");
-		if (instream == NULL || outstream == NULL) 
+		// If we got multiple args then it's filemode...
+		if (argc > 2)
 		{
-			perror("fopen");
+			if (strcmp(argv[1], "-f") == 0)
+			{
+				instream = fopen(argv[2], "r");
+				freopen("pseudoshell_output.txt", "w", stdout);
+				changed = 1;
+
+				// Check to see if the streams we were given are okay
+				if (instream == NULL || outstream == NULL) 
+				{
+					perror("fopen");
+					exit(EXIT_FAILURE);
+				}
+			}
+			// ... but maybe not? Make sure it was -f flag
+			else
+			{
+				fprintf(stderr, "Too many args without -f flag.\n");
+				exit(EXIT_FAILURE);
+			}
+		}
+		// If we got one arg, it's gotta be "-command", otherwise we
+		// don't continue.
+		else if (strcmp(argv[1], "-command") != 0)
+		{
+			fprintf(stderr, "No correct startup flags given.\n");
 			exit(EXIT_FAILURE);
 		}
 	}
+	else
+	{
+		fprintf(stderr, "No startup flags given.\n");
+		exit(EXIT_FAILURE);
+	}
 
-	/* Main run loop */
-	while (((outstream == stdout) ? printf(">>> ") : 1) 
+	// Main run loop
+	while ((!changed ? printf(">>> ") : 1) 
 		&& (nread = getline(&line, &len, instream)) != -1) 
 	{
 		// Tokenize the input string
@@ -309,81 +384,40 @@ int main(int argc, char *argv[])
 			// Handle "ls"
 			else if (strcmp(token, "ls") == 0)
 			{
-				ls_wrapper(outstream);
+				listDir();
 			}
 
 			// Handle "pwd"
 			else if (strcmp(token, "pwd") == 0) 
 			{
-				pwd_wrapper(outstream);
+				showCurrentDir();
 			}
 
 			// Handle "mkdir"
 			else if (strcmp(token, "mkdir") == 0)
 			{
-				int argcount = 0;
-				while (token != NULL && argcount < 2)
-				{
-					if (strcmp(token, ";") == 0)
-					{
-						break;
-					}
-					if (strcmp(token, "mkdir") == 0)
-					{
-						token = strtok(NULL, delimiter);
-						argcount++;
-						continue;
-					}
-
-					mkdir_wrapper(token, outstream);
-					argcount++;
-				}
+				one_arg_wrapper(token, "mkdir");
 			}
 
 			// Handle "cd"
 			else if (strcmp(token, "cd") == 0)
 			{
-				int argcount = 0;
-				while (token != NULL && argcount < 2)
-				{
-					if (strcmp(token, ";") == 0)
-					{
-						break;
-					}
-					if (strcmp(token, "cd") == 0)
-					{
-						token = strtok(NULL, delimiter);
-						argcount++;
-						continue;
-					}
-
-					cd_wrapper(token, outstream);
-					argcount++;
-				}
+				one_arg_wrapper(token, "cd");
 			}
 
 			// Handle "rm"
 			else if (strcmp(token, "rm") == 0)
 			{
-				int argcount = 0;
-				while (token != NULL && argcount < 2)
-				{
-					if (strcmp(token, ";") == 0)
-					{
-						break;
-					}
-					if (strcmp(token, "rm") == 0)
-					{
-						token = strtok(NULL, delimiter);
-						argcount++;
-						continue;
-					}
-
-					rm_wrapper(token);
-					argcount++;
-				}
+				one_arg_wrapper(token, "rm");
 			}
 
+			// Handle "cat"
+			else if (strcmp(token, "cat") == 0)
+			{
+				one_arg_wrapper(token, "cat");
+			}
+
+			// Default case
 			else
 			{
 				fprintf(stderr, "Unrecognized command: %s\n", token);
@@ -394,13 +428,14 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	/* Memory cleanup & closing files */
+	// Cleanup
 	free(line);
 	if (instream != stdin)
 	{
 		fclose(instream);
+		system("perl -pi -e 'chomp if eof' pseudoshell_output.txt");
 		fclose(outstream);
 	}
 
-	return 0;
+	return EXIT_SUCCESS;
 } 
