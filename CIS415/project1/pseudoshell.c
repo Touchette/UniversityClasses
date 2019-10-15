@@ -1,16 +1,27 @@
 /*
  * Description:
- * A very basic bash emulator that can simulate a few
- * commands
+ * A very basic bash emulator that can simulate a few commands. It implements
+ * ls, pwd, mkdir, cd, cp, mv, and rm. All of the functions are implemented
+ * solely with syscalls, any string manipulation is done with strcat and
+ * strcmp (or manually). Accepts input in both a command-line mode and a
+ * file-reading mode via use of execution flags.
  *
  * Author: Natalie Letz #951463883
  *
- * Date: 2019-10-07
+ * Date: 2019-10-11
  *
  * Notes:
- * This is where my notes would go ... if I HAD ANY
+ * 1. ls is implemented via getdents and not the calls listed on Piazza (I
+ * wrote the function before the lab or the Piazza post being made).
+ * 2. I don't think that the program is very efficient nor very performant.
+ * This is in part due to how many loops and branches I use (way too many) as
+ * well as my lack of splitting repeated code into functions. I tried to do so,
+ * but continually ran into memory problems (leaks, etc.) and didn't think it
+ * worth the hassle to optimize.
+ * 3. I don't like C strings.
  */
 
+/*-------------------------Preprocessor Directives---------------------------*/
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include "command.h"
@@ -28,8 +39,9 @@
 #define AT_FDCWD -100
 #define BUF_SIZE 1024
 #define READ_BUF_SIZE 1048576
+/*---------------------------------------------------------------------------*/
 
-
+/*--------------------------Struct/Enum Definitions--------------------------*/
 // Used for the ls_wrapper function for the getdents syscall
 // to work for printing... no idea what's going on tho
 struct linux_dirent
@@ -39,7 +51,11 @@ struct linux_dirent
     unsigned short d_reclen;
     char           d_name[];
 };
+/*---------------------------------------------------------------------------*/
 
+/*--------------------------Function Definitions-----------------------------*/
+// My error handler that uses perror to give way more descriptive error
+// printouts
 int handleError(int res, const char *callname) 
 {
 	if (res == -1)
@@ -55,6 +71,7 @@ int handleError(int res, const char *callname)
 	return 0;
 }
 
+// Makes absolute paths from relative paths for various system calls
 char * createAbsPath(const char *path)
 {
 	// Caller needs to free this
@@ -68,6 +85,7 @@ char * createAbsPath(const char *path)
 	return cwd;
 }
 
+// ls
 void listDir() 
 {
 	char *buffer = malloc(sizeof(char) * BUF_SIZE);
@@ -104,13 +122,11 @@ void listDir()
 			// ???
 			d = (struct linux_dirent *) (buffer + bpos);
 			d_type = *(buffer + bpos + d->d_reclen - 1);
-
-			// Make sure not to print the current directory or the parent directory
-			if ((strcmp(d->d_name, ".") != 0) && (strcmp(d->d_name, "..") != 0))
-			{
-				write_res = syscall(SYS_write, fileno(stdout), strcat(d->d_name, " "), strlen(d->d_name) + 1);
-				handleError(write_res, "write");
-			}
+			write_res = syscall(SYS_write,
+				fileno(stdout),
+				strcat(d->d_name, " "), 
+				strlen(d->d_name) + 1);
+			handleError(write_res, "write");
 
 			bpos += d->d_reclen;
 		}
@@ -124,6 +140,7 @@ void listDir()
 	free(buffer);
 }
 
+// pwd
 void showCurrentDir()
 {
 	char *cwd_buffer = malloc(sizeof(char) * BUF_SIZE);
@@ -146,6 +163,7 @@ void showCurrentDir()
 	free(cwd_buffer);
 }
 
+// mkdir
 void makeDir(char *dirName)
 {
 	mode_t mode = (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IROTH);
@@ -157,6 +175,7 @@ void makeDir(char *dirName)
 	handleError(mkdir_res, "mkdir");
 }
 
+// cd
 void changeDir(char *dirName)
 {
 	char *cwd = NULL;
@@ -181,13 +200,14 @@ void changeDir(char *dirName)
 	free(cwd);
 }
 
+// cp
 void copyFile(char *sourcePath, char *destinationPath)
 {
 	// Setting up the source path we were given as well as
 	// where we're going
 	char *read_buffer = malloc(sizeof(char) * READ_BUF_SIZE);
 	char *sourcePath_buffer = NULL;
-	char *destinationPath_buffer = NULL;
+	char *destPath_buffer = NULL;
 
 	// Constructing absolute path to the file if needed
 	if (sourcePath[0] != '/')
@@ -213,15 +233,15 @@ void copyFile(char *sourcePath, char *destinationPath)
 	// Constructing the absolute path to the file if needed
 	if (destinationPath[0] != '/')
 	{
-		destinationPath_buffer = createAbsPath(destinationPath);
+		destPath_buffer = createAbsPath(destinationPath);
 	}
 	// Otherwise just use it
 	else
 	{
-		destinationPath_buffer = destinationPath;
+		destPath_buffer = destinationPath;
 	}
 
-	destinationPath_buffer = strcat(destinationPath_buffer, destination_filename);
+	destPath_buffer = strcat(destPath_buffer, destination_filename);
 
 	// Normal stuff from other functions
 	mode_t read_mode = (S_IRUSR | S_IRGRP | S_IROTH);
@@ -238,7 +258,7 @@ void copyFile(char *sourcePath, char *destinationPath)
 	close(open_res);
 
 	// Open the destination file
-	creat_res = syscall(SYS_creat, destinationPath_buffer, write_mode);
+	creat_res = syscall(SYS_creat, destPath_buffer, write_mode);
 	handleError(creat_res, "creat");
 
 	// Write the file into the source destination
@@ -250,14 +270,15 @@ void copyFile(char *sourcePath, char *destinationPath)
 	free(destination_filename);
 	free(read_buffer);
 	free(sourcePath_buffer);
-	free(destinationPath_buffer);
+	free(destPath_buffer);
 }
 
+// mv
 void moveFile(char *sourcePath, char *destinationPath) 
 {
 	// All of this is same as copy basically
 	char *sourcePath_buffer = NULL;
-	char *destinationPath_buffer = NULL;
+	char *destPath_buffer = NULL;
 
 	if (sourcePath[0] != '/')
 	{
@@ -274,28 +295,29 @@ void moveFile(char *sourcePath, char *destinationPath)
 
 	if (destinationPath[0] != '/')
 	{
-		destinationPath_buffer = createAbsPath(destinationPath);
+		destPath_buffer = createAbsPath(destinationPath);
 	}
 	else
 	{
-		destinationPath_buffer = destinationPath;
+		destPath_buffer = destinationPath;
 	}
-	destinationPath_buffer = strcat(destinationPath_buffer, destination_filename);
+	destPath_buffer = strcat(destPath_buffer, destination_filename);
 
 	int rename_res = 0;
 
 	// Rename will actually move a file directories if it needs to...
 	// ... good thing I did all the work up there to get full pathnames
-	rename_res = syscall(SYS_rename, sourcePath_buffer, destinationPath_buffer);
+	rename_res = syscall(SYS_rename, sourcePath_buffer, destPath_buffer);
 	handleError(rename_res, "rename");
 
 
 	// Cleanup
 	free(destination_filename);
 	free(sourcePath_buffer);
-	free(destinationPath_buffer);
+	free(destPath_buffer);
 }
 
+// rm
 void deleteFile(char *filename)
 {
 	char *cwd = NULL;
@@ -320,6 +342,7 @@ void deleteFile(char *filename)
 	free(cwd);
 }
 
+// cat
 void displayFile(char *filename)
 {
 	char *cat_buffer = malloc(sizeof(char) * READ_BUF_SIZE);
@@ -348,6 +371,8 @@ void displayFile(char *filename)
 	close(open_res);
 }
 
+// Wraps the functions that take one argument so that I can minimize
+// repeated code within main(). 
 void one_arg_wrapper(char *token, char *function)
 {
 	// Need the delimiter here as well, argcount keeps track
@@ -355,15 +380,23 @@ void one_arg_wrapper(char *token, char *function)
 	// correct amount we can break out
 	const char *delimiter = " \t\n\f\r\v";
 	char *arg1 = malloc(sizeof(char) * BUF_SIZE);
-	int argcount = 0;
+	int argcount, error = 0;
 
-	while (token != NULL && argcount < 2)
+	while (token != NULL && argcount <= 2)
 	{
+		if (argcount == 2)
+		{
+			fprintf(stderr, "Too many arguments for function %s!\n", function);
+			error = 1;
+			break;
+		}
+
 		// Handle a control char, break out when we reach one
 		if (strcmp(token, ";") == 0)
 		{
 			break;
 		}
+
 		// One of the tokens is the function name... skip it
 		if (strcmp(token, function) == 0)
 		{
@@ -376,28 +409,33 @@ void one_arg_wrapper(char *token, char *function)
 		argcount++;
 	}
 
-	// Handle all the function calls
-	if (strcmp(function, "mkdir") == 0 )
+	if (!error)
 	{
-		makeDir(arg1);
-	}
-	else if (strcmp(function, "cat") == 0)
-	{
-		displayFile(arg1);
-	}
-	else if (strcmp(function, "rm") == 0)
-	{
-		deleteFile(arg1);
-	}
-	else if (strcmp(function, "cd") == 0)
-	{
-		changeDir(arg1);
+		// Handle all the function calls
+		if (strcmp(function, "mkdir") == 0 )
+		{
+			makeDir(arg1);
+		}
+		else if (strcmp(function, "cat") == 0)
+		{
+			displayFile(arg1);
+		}
+		else if (strcmp(function, "rm") == 0)
+		{
+			deleteFile(arg1);
+		}
+		else if (strcmp(function, "cd") == 0)
+		{
+			changeDir(arg1);
+		}
 	}
 
 	// Cleanup
 	free(arg1);
 }
 
+// Wraps the functions that take two arguments so that I can minimize
+// repeated code within main(). 
 void two_arg_wrapper(char *token, char *function)
 {
 	// Need the delimiter here as well, argcount keeps track
@@ -406,15 +444,23 @@ void two_arg_wrapper(char *token, char *function)
 	const char *delimiter = " \t\n\f\r\v";
 	char *arg1 = malloc(sizeof(char) * BUF_SIZE);
 	char *arg2 = malloc(sizeof(char) * BUF_SIZE);
-	int argcount = 0;
+	int argcount, error = 0;
 
-	while (token != NULL && argcount < 4)
+	while (token != NULL && argcount <= 4)
 	{
+		if (argcount == 4)
+		{
+			fprintf(stderr, "Too many arguments for function %s!\n", function);
+			error = 1;
+			break;
+		}
+
 		// Handle a control char, break out when we reach one
 		if (strcmp(token, ";") == 0)
 		{
 			break;
 		}
+
 		// One of the tokens is the function name... skip it
 		if (strcmp(token, function) == 0)
 		{
@@ -425,7 +471,7 @@ void two_arg_wrapper(char *token, char *function)
 
 		// Grab the first argument when we find it if we haven't
 		// yet goten it
-		if (token && (strlen(arg1) == 0))
+		if ((token != NULL) && (strlen(arg1) == 0))
 		{
 			strcpy(arg1, token);
 			token = strtok(NULL, delimiter);
@@ -438,21 +484,26 @@ void two_arg_wrapper(char *token, char *function)
 		argcount++;
 	}
 
-	// Handle all the function calls
-	if (strcmp(function, "cp") == 0 )
+	if (!error)
 	{
-		copyFile(arg1, arg2);
-	}
-	else if (strcmp(function, "mv") == 0)
-	{
-		moveFile(arg1, arg2);
+		// Handle all the function calls
+		if (strcmp(function, "cp") == 0 )
+		{
+			copyFile(arg1, arg2);
+		}
+		else if (strcmp(function, "mv") == 0)
+		{
+			moveFile(arg1, arg2);
+		}
 	}
 
 	// Cleanup
 	free(arg1);
 	free(arg2);
 }
+/*---------------------------------------------------------------------------*/
 
+/*-----------------------------Program Main----------------------------------*/
 int main(int argc, char *argv[]) 
 {
 	setbuf(stdout, NULL);
@@ -465,9 +516,9 @@ int main(int argc, char *argv[])
 	// to be stdin and stdout
 	FILE *instream;
 	FILE *outstream;
+	int changed = 0;
 
 	// The variables used for getline() calls
-	int changed = 0;
 	char *line  = 0;
 	size_t len  = 0;
 	ssize_t nread;
@@ -616,4 +667,5 @@ int main(int argc, char *argv[])
 	}
 
 	return EXIT_SUCCESS;
-} 
+}
+/*-----------------------------Program End-----------------------------------*/
