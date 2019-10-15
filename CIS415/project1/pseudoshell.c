@@ -14,6 +14,7 @@
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include "command.h"
+#include <libgen.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -26,7 +27,7 @@
 // Some constants used in various functions
 #define AT_FDCWD -100
 #define BUF_SIZE 1024
-#define CAT_BUF 1048576
+#define READ_BUF_SIZE 1048576
 
 
 // Used for the ls_wrapper function for the getdents syscall
@@ -65,6 +66,25 @@ char * createAbsPath(const char *path)
 	strcat(cwd, path);
 
 	return cwd;
+}
+
+char * constructPath(char *path)
+{
+	char *newPath = malloc(sizeof(char) * BUF_SIZE);
+	strcpy(newPath, path);
+
+	// Constructing the absolute path if we need to
+	if (path[0] != '/')
+	{
+		newPath = createAbsPath(path);
+		return newPath;
+	}
+	else {
+		free(newPath);
+		return path;
+	}
+
+	return "constructPath bug.\n";
 }
 
 void listDir() 
@@ -182,17 +202,119 @@ void changeDir(char *dirName)
 
 void copyFile(char *sourcePath, char *destinationPath)
 {
+	// Setting up the source path we were given as well as
+	// where we're going
+	char *read_buffer = malloc(sizeof(char) * READ_BUF_SIZE);
+	char *sourcePath_buffer = NULL;
+	char *destinationPath_buffer = NULL;
 
+	// Constructing absolute path to the file if needed
+	if (sourcePath[0] != '/')
+	{
+		sourcePath_buffer = createAbsPath(sourcePath);
+	}
+	// Otherwise just use it
+	else
+	{
+		sourcePath_buffer = sourcePath;
+	}
+	
+	// This is hideously ugly. Gotta make the destination file, which means
+	// I need a full path to the file + the "/filename". So, I need to make
+	// a string of "/" and append the filename to it... but I need a buffer
+	// for "/" or else I won't have enough space to put the rest of the file.
+	// So we get this ugly stuff.
+	char *destination_filename = malloc(sizeof(char) * BUF_SIZE);
+	destination_filename[0] = '/'; 
+	strcat(destination_filename, basename(sourcePath_buffer));
+	// Why did I have to do that? Memory management sucks sometimes.
+
+	// Constructing the absolute path to the file if needed
+	if (destinationPath[0] != '/')
+	{
+		destinationPath_buffer = createAbsPath(destinationPath);
+	}
+	// Otherwise just use it
+	else
+	{
+		destinationPath_buffer = destinationPath;
+	}
+
+	destinationPath_buffer = strcat(destinationPath_buffer, destination_filename);
+
+	// Normal stuff from other functions
+	mode_t read_mode = (S_IRUSR | S_IRGRP | S_IROTH);
+	mode_t write_mode = (S_IWUSR | S_IWGRP | S_IWOTH) | read_mode;
+	int open_res, read_res, write_res, creat_res, read_len = 0;
+
+	// Open the source file, handle any errors
+	open_res = syscall(SYS_open, sourcePath_buffer, O_RDONLY, read_mode);
+	handleError(open_res, "open");
+
+	// Read the source file into the buffer
+	read_res = syscall(SYS_read, open_res, read_buffer, READ_BUF_SIZE);
+	handleError(read_res, "read");
+	close(open_res);
+
+	// Open the destination file
+	creat_res = syscall(SYS_creat, destinationPath_buffer, write_mode);
+	handleError(creat_res, "creat");
+
+	// Write the file into the source destination
+	write_res = syscall(SYS_write, creat_res, read_buffer, strlen(read_buffer));
+	handleError(write_res, "write");
+	close(creat_res);
+
+	// Cleanup
+	free(destination_filename);
+	free(read_buffer);
+	free(sourcePath_buffer);
+	free(destinationPath_buffer);
 }
 
 void moveFile(char *sourcePath, char *destinationPath) 
 {
+	// All of this is same as copy basically
+	char *sourcePath_buffer = NULL;
+	char *destinationPath_buffer = NULL;
 
+	if (sourcePath[0] != '/')
+	{
+		sourcePath_buffer = createAbsPath(sourcePath);
+	}
+	else
+	{
+		sourcePath_buffer = sourcePath;
+	}
+
+	char *destination_filename = malloc(sizeof(char) * BUF_SIZE);
+	destination_filename[0] = '/'; 
+	strcat(destination_filename, basename(sourcePath_buffer));
+
+	if (destinationPath[0] != '/')
+	{
+		destinationPath_buffer = createAbsPath(destinationPath);
+	}
+	else
+	{
+		destinationPath_buffer = destinationPath;
+	}
+	destinationPath_buffer = strcat(destinationPath_buffer, destination_filename);
+
+	int rename_res = 0;
+
+	rename_res = syscall(SYS_rename, sourcePath_buffer, destinationPath_buffer);
+	handleError(rename_res, "rename");
+
+
+	free(destination_filename);
+	free(sourcePath_buffer);
+	free(destinationPath_buffer);
 }
 
 void deleteFile(char *filename)
 {
-	char *cwd;
+	char *cwd = NULL;
 	int unlink_res = 0;
 
 	// Constructing absolute path to the file if needed
@@ -216,7 +338,7 @@ void deleteFile(char *filename)
 
 void displayFile(char *filename)
 {
-	char *cat_buffer = malloc(sizeof(char) * CAT_BUF);
+	char *cat_buffer = malloc(sizeof(char) * READ_BUF_SIZE);
 	mode_t mode = (S_IRUSR | S_IRGRP | S_IROTH); 
 	int cat_res, open_res, write_res, cat_len = 0;
 
@@ -226,7 +348,7 @@ void displayFile(char *filename)
 
 	// Read the file into the buffer for printing, handle any
 	// errors
-	cat_res = syscall(SYS_read, open_res, cat_buffer, CAT_BUF);
+	cat_res = syscall(SYS_read, open_res, cat_buffer, READ_BUF_SIZE);
 	handleError(cat_res, "read");
 
 	// Make the string writeable
@@ -248,6 +370,7 @@ void one_arg_wrapper(char *token, char *function)
 	// of how many args we have so if we get more than the
 	// correct amount we can break out
 	const char *delimiter = " \t\n\f\r\v";
+	char *arg1 = malloc(sizeof(char) * BUF_SIZE);
 	int argcount = 0;
 
 	while (token != NULL && argcount < 2)
@@ -265,26 +388,81 @@ void one_arg_wrapper(char *token, char *function)
 			continue;
 		}
 
-		// Handle all the function calls
-		if (strcmp(function, "mkdir") == 0 )
-		{
-			makeDir(token);
-		}
-		else if (strcmp(function, "cat") == 0)
-		{
-			displayFile(token);
-		}
-		else if (strcmp(function, "rm") == 0)
-		{
-			deleteFile(token);
-		}
-		else if (strcmp(function, "cd") == 0)
-		{
-			changeDir(token);
-		}
-
+		strcpy(arg1, token);
 		argcount++;
 	}
+
+	// Handle all the function calls
+	if (strcmp(function, "mkdir") == 0 )
+	{
+		makeDir(arg1);
+	}
+	else if (strcmp(function, "cat") == 0)
+	{
+		displayFile(arg1);
+	}
+	else if (strcmp(function, "rm") == 0)
+	{
+		deleteFile(arg1);
+	}
+	else if (strcmp(function, "cd") == 0)
+	{
+		changeDir(arg1);
+	}
+
+	free(arg1);
+}
+
+void two_arg_wrapper(char *token, char *function)
+{
+	// Need the delimiter here as well, argcount keeps track
+	// of how many args we have so if we get more than the
+	// correct amount we can break out
+	const char *delimiter = " \t\n\f\r\v";
+	char *arg1 = malloc(sizeof(char) * BUF_SIZE);
+	char *arg2 = malloc(sizeof(char) * BUF_SIZE);
+	int argcount = 0;
+
+	while (token != NULL && argcount < 4)
+	{
+		// Handle a control char, break out when we reach one
+		if (strcmp(token, ";") == 0)
+		{
+			break;
+		}
+		// One of the tokens is the function name... skip it
+		if (strcmp(token, function) == 0)
+		{
+			token = strtok(NULL, delimiter);
+			argcount++;
+			continue;
+		}
+
+		if (token && (strlen(arg1) == 0))
+		{
+			strcpy(arg1, token);
+			token = strtok(NULL, delimiter);
+			argcount++;
+			continue;
+		}
+
+		strcpy(arg2, token);
+		argcount++;
+	}
+
+	// Handle all the function calls
+	if (strcmp(function, "cp") == 0 )
+	{
+		copyFile(arg1, arg2);
+	}
+	else if (strcmp(function, "mv") == 0)
+	{
+		moveFile(arg1, arg2);
+	}
+
+	// Cleanup
+	free(arg1);
+	free(arg2);
 }
 
 int main(int argc, char *argv[]) 
@@ -417,6 +595,18 @@ int main(int argc, char *argv[])
 				one_arg_wrapper(token, "cat");
 			}
 
+			// Handle "cp"
+			else if (strcmp(token, "cp") == 0)
+			{
+				two_arg_wrapper(token, "cp");
+			}
+
+			// Handle "mv"
+			else if (strcmp(token, "mv") == 0)
+			{
+				two_arg_wrapper(token, "mv");
+			}
+
 			// Default case
 			else
 			{
@@ -430,7 +620,7 @@ int main(int argc, char *argv[])
 	
 	// Cleanup
 	free(line);
-	if (instream != stdin)
+	if (changed)
 	{
 		fclose(instream);
 		system("perl -pi -e 'chomp if eof' pseudoshell_output.txt");
