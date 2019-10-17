@@ -61,9 +61,7 @@ int handleError(int res, const char *callname)
 	if (res == -1)
 	{
 		// Get the errno so I can reference the documentation
-		fprintf(stderr, "Error in %s: %d. Problem:\n\t", callname, errno);
-		// Get the error output that C provides for more clues
-		perror(callname);
+		fprintf(stderr, "Error in %s; errno is %d.\n", callname, errno);
 
 		return -1;
 	}
@@ -370,144 +368,160 @@ void displayFile(char *filename)
 	close(open_res);
 }
 
-// Wraps the functions that take one argument so that I can minimize
-// repeated code within main().
-void one_arg_wrapper(char *token, char *function)
-{
-	// Need the delimiter here as well, argcount keeps track
-	// of how many args we have so if we get more than the
-	// correct amount we can break out
-	const char *delimiter = " \t\n\f\r\v";
-	char *arg1 = malloc(sizeof(char) * BUF_SIZE);
-	int argcount, error = 0;
-
-	while (token != NULL && argcount < 2)
-	{
-		if (argcount == 2)
-		{
-			fprintf(stderr, "Too many arguments for function %s!\n", function);
-			error = 1;
-			break;
-		}
-
-		// Handle a control char, break out when we reach one
-		if (strcmp(token, ";") == 0)
-		{
-			break;
-		}
-
-		// One of the tokens is the function name... skip it
-		if (strcmp(token, function) == 0)
-		{
-			token = strtok(NULL, delimiter);
-			argcount++;
-			continue;
-		}
-
-		strcpy(arg1, token);
-		argcount++;
-	}
-
-	if (!error)
-	{
-		// Handle all the function calls
-		if (strcmp(function, "mkdir") == 0 )
-		{
-			makeDir(arg1);
-		}
-		else if (strcmp(function, "cat") == 0)
-		{
-			displayFile(arg1);
-		}
-		else if (strcmp(function, "rm") == 0)
-		{
-			deleteFile(arg1);
-		}
-		else if (strcmp(function, "cd") == 0)
-		{
-			changeDir(arg1);
-		}
-	}
-
-	// Cleanup
-	free(arg1); arg1 = NULL;
-}
-
 // Wraps the functions that take two arguments so that I can minimize
 // repeated code within main().
-void two_arg_wrapper(char *token, char *function)
+void callFunction(char *command, char *arg1, char *arg2)
 {
-	// Need the delimiter here as well, argcount keeps track
-	// of how many args we have so if we get more than the
-	// correct amount we can break out
-	const char *delimiter = " \t\n\f\r\v";
-	char *arg1 = malloc(sizeof(char) * BUF_SIZE);
-	char *arg2 = malloc(sizeof(char) * BUF_SIZE);
-	int argcount, error = 0;
-
-	while (token != NULL && argcount < 4)
+	// Handle ls
+	if (strcmp(command, "ls") == 0)
 	{
-		if (argcount == 4)
+		if (arg1 == NULL && arg2 == NULL)
 		{
-			fprintf(stderr, "Too many arguments for function %s!\n", function);
-			error = 1;
-			break;
+			listDir();
+			return;
 		}
-
-		// Handle a control char, break out when we reach one
-		if (strcmp(token, ";") == 0)
+		else
 		{
-			break;
+			fprintf(stdout, "Unsupported parameters for ls.\n");
+			return;
 		}
-
-		// One of the tokens is the function name... skip it
-		if (strcmp(token, function) == 0)
-		{
-			token = strtok(NULL, delimiter);
-			argcount++;
-			continue;
-		}
-
-		// Grab the first argument when we find it if we haven't
-		// yet goten it
-		if ((token != NULL) && (strlen(arg1) == 0))
-		{
-			strcpy(arg1, token);
-			token = strtok(NULL, delimiter);
-			argcount++;
-			continue;
-		}
-
-		// Grab the other argument
-		strcpy(arg2, token);
-		argcount++;
 	}
-
-	fprintf(stderr, "%s - %s\n", arg1, arg2);
-
-	if (!error)
+	// Handle pwd
+	else if (strcmp(command, "pwd") == 0)
 	{
-		// Handle all the function calls
-		if (strcmp(function, "cp") == 0 )
+		if (arg1 == NULL && arg2 == NULL)
 		{
-			if (param1 != NULL && param2 != NULL)
-			{
-				copyFile(param1, param2);
-			}
-			else
-			{
-				// err
-			}
+			showCurrentDir();
+			return;
 		}
-		else if (strcmp(function, "mv") == 0)
+		else
+		{
+			fprintf(stdout, "Unsupported parameters for pwd.\n");
+			return;
+		}
+	}
+	// Handle mkdir
+	else if (strcmp(command, "mkdir") == 0)
+	{
+		if (arg1 != NULL && arg2 == NULL)
+		{
+			makeDir(arg1);
+			return;
+		}
+		else
+		{
+			fprintf(stdout, "Unsupported parameters for mkdir.\n");
+			return;
+		}
+	}
+	// Handle cd
+	else if (strcmp(command, "cd") == 0)
+	{
+		if (arg1 != NULL && arg2 == NULL)
+		{
+			changeDir(arg1);
+			return;
+		}
+		else
+		{
+			fprintf(stdout, "Unsupported parameters for cd.\n");
+			return;
+		}
+	}
+	// Handle cp
+	else if (strcmp(command, "cp") == 0)
+	{
+		if (arg1 != NULL && arg2 != NULL)
+		{
+			copyFile(arg1, arg2);
+			return;
+		}
+		else
+		{
+			fprintf(stdout, "Insufficient parameters for cp.\n");
+			return;
+		}
+	}
+	// Handle mv
+	else if (strcmp(command, "mv") == 0)
+	{
+		if (arg1 != NULL && arg2 != NULL)
 		{
 			moveFile(arg1, arg2);
+			return;
+		}
+		else
+		{
+			fprintf(stdout, "Insufficient parameters for mv.\n");
+			return;
 		}
 	}
+	// Handle rm
+	else if (strcmp(command, "rm") == 0)
+	{
+		if (arg1 != NULL && arg2 == NULL)
+		{
+			deleteFile(arg1);
+			return;
+		}
+		else
+		{
+			fprintf(stdout, "Unsupported parameters for rm.\n");
+			return;
+		}
+	}
+	// Handle cat
+	else if (strcmp(command, "cat") == 0)
+	{
+		if (arg1 != NULL && arg2 == NULL)
+		{
+			displayFile(arg1);
+			return;
+		}
+		else
+		{
+			fprintf(stdout, "Unsupported parameters for cat.\n");
+			return;
+		}
+	}
+}
 
-	// Cleanup
-	free(arg1); arg1 = NULL;
-	free(arg2); arg2 = NULL;
+// Checks if a given string is a valid command
+int checkCommand(char *cmd)
+{
+	if (cmd == NULL)
+		return 0;
+	else if (strcmp(cmd, "ls") == 0)
+		return 1;
+	else if (strcmp(cmd, "pwd") == 0)
+		return 1;
+	else if (strcmp(cmd, "mkdir") == 0)
+		return 1;
+	else if (strcmp(cmd, "cd") == 0)
+		return 1;
+	else if (strcmp(cmd, "cp") == 0)
+		return 1;
+	else if (strcmp(cmd, "mv") == 0)
+		return 1;
+	else if (strcmp(cmd, "rm") == 0)
+		return 1;
+	else if (strcmp(cmd, "cat") == 0)
+		return 1;
+	else if (strcmp(cmd, "exit") == 0)
+		return 1;
+	else
+		return 0;
+}
+
+// Checks if a given string is a control code
+int checkControl(char *ch)
+{
+	if (ch == NULL)
+		return 0;
+	else if (strcmp(ch, ";") == 0)
+		return 1;
+	else
+		return 0;
 }
 /*---------------------------------------------------------------------------*/
 
@@ -518,7 +532,10 @@ int main(int argc, char *argv[])
 
 	// Delimiter & token pointer to be used by strotok()
 	const char *delimiter = " \t\n\f\r\v";
-	char *token, command, param1, param2;
+	char *token;
+	char *command = malloc(sizeof(char) * BUF_SIZE);
+	char *param1  = malloc(sizeof(char) * BUF_SIZE);
+	char *param2  = malloc(sizeof(char) * BUF_SIZE);
 
 	// The in / out streams used for writing, by default going
 	// to be stdin and stdout
@@ -581,9 +598,15 @@ int main(int argc, char *argv[])
 		token = strtok(line, delimiter);
 
 		// check if token is a command here else continue
-		if (checkCommand(token) == 0)
+		if (checkCommand(token))
 		{
-			fprintf(stderr, "err\n");
+			strcpy(command, token);
+			printf("command is now: %s\n", command);
+		}
+		else
+		{			
+			fprintf(stdout, "Error: unrecognized command.\n");
+			continue;
 		}
 
 		// Exit successfully if we get an exit command
@@ -591,12 +614,12 @@ int main(int argc, char *argv[])
 		{
 			if (strcmp(token, "exit") == 0)
 			{
-				fprintf(outstream, "\n");
+				fprintf(stdout, "\n");
 				break;
 			}
 		}
 		// Do nothing if we get empty input
-		else
+		else if (token == NULL)
 		{
 			continue;
 		}
@@ -608,9 +631,10 @@ int main(int argc, char *argv[])
 			token = strtok(NULL, delimiter);
 			if (checkCommand(token) == 1)
 			{
-				fprintf(stdout, "err\n");
+				fprintf(stdout, "Error: incorrect syntax; no control code found.\n");
+				break;
 			}
-			else if (checkControl(token) == 1)
+			else if (checkControl(token) || token == NULL)
 			{
 				callFunction(command, NULL, NULL);
 				break;
@@ -619,11 +643,12 @@ int main(int argc, char *argv[])
 			{
 				strcpy(param1, token);
 				token = strtok(NULL, delimiter);
-				if (checkCommand(token) == 1)
+				if (checkCommand(token))
 				{
-					fprintf(stdout, "err\n");
+					fprintf(stdout, "Error: incorrect syntax; no control code found.\n");
+					break;
 				}
-				else if (checkControl(token) == 1)
+				else if (checkControl(token) || token == NULL)
 				{
 					callFunction(command, param1, NULL);
 					break;
@@ -635,79 +660,6 @@ int main(int argc, char *argv[])
 					break;
 				}
 			}
-
-			// Carry on if we get a semicolon in the wild
-			if (strcmp(token, ";") == 0)
-			{
-				token = strtok(NULL, delimiter);
-				continue;
-			}
-
-			// Handle "ls"
-			else if (strcmp(token, "ls") == 0)
-			{
-				token = strtok(NULL, delimiter);
-				if ((strcmp(token, ";") != 0) || token != NULL)
-				{
-					fprintf(stdout, "err\n");
-					continue;
-				}
-				else
-				{
-					listDir();
-				}
-			}
-
-			// Handle "pwd"
-			else if (strcmp(token, "pwd") == 0)
-			{
-				showCurrentDir();
-			}
-
-			// Handle "mkdir"
-			else if (strcmp(token, "mkdir") == 0)
-			{
-				one_arg_wrapper(token, "mkdir");
-			}
-
-			// Handle "cd"
-			else if (strcmp(token, "cd") == 0)
-			{
-				one_arg_wrapper(token, "cd");
-			}
-
-			// Handle "rm"
-			else if (strcmp(token, "rm") == 0)
-			{
-				one_arg_wrapper(token, "rm");
-			}
-
-			// Handle "cat"
-			else if (strcmp(token, "cat") == 0)
-			{
-				one_arg_wrapper(token, "cat");
-			}
-
-			// Handle "cp"
-			else if (strcmp(token, "cp") == 0)
-			{
-				two_arg_wrapper(token, "cp");
-			}
-
-			// Handle "mv"
-			else if (strcmp(token, "mv") == 0)
-			{
-				two_arg_wrapper(token, "mv");
-			}
-
-			// Default case
-			else
-			{
-				fprintf(stderr, "Unrecognized command: %s\n", token);
-			}
-
-			// Clean up
-			token = strtok(NULL, delimiter);
 		}
 	}
 
