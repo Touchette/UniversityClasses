@@ -36,8 +36,9 @@ Odometer *malloc_Odometer(int size)
 
 void free_Odometer(Odometer *ptr)
 {
-	if(NULL != ptr)
+	if (NULL != ptr)
 	{
+		free(ptr->Indexes);
 		free(ptr);
 	}
 }
@@ -48,17 +49,18 @@ HyperEdge *malloc_HyperEdge(int size)
 	returnValue = malloc(sizeof(HyperEdge));
 	returnValue->Size = size;
 	returnValue->NodePointers = malloc(sizeof(void *)*size);
-	for(int i=0; i < size;i++)
+	for (int i=0; i < size;i++)
 	{
 		returnValue->NodePointers[i] = NULL;
-	}	
+	}
 	return returnValue;
 }
 
 void free_HyperEdge(HyperEdge *ptr)
 {
-	if(NULL != ptr)
+	if (NULL != ptr)
 	{
+		free(ptr->NodePointers);
 		free(ptr);
 	}
 }
@@ -66,11 +68,11 @@ void free_HyperEdge(HyperEdge *ptr)
 HyperGraph *malloc_HyperGraph(int size)
 {
 	HyperGraph *returnValue = NULL;
-	
+
 	returnValue = malloc(sizeof(HyperGraph));
 	returnValue ->Size = size;
 	returnValue->NodeVector = malloc(sizeof(void*)*size);
-	for(int i =0; i < size ; i++)
+	for (int i =0; i < size ; i++)
 	{
 		returnValue->NodeVector[i] = NULL;
 	}
@@ -80,32 +82,32 @@ HyperGraph *malloc_HyperGraph(int size)
 
 void free_HyperGraph(HyperGraph *ptr)
 {
-	if(NULL != ptr)
+	if (NULL != ptr)
 	{
+		free(ptr->NodeVector);
 		free(ptr);
 	}
 }
 
 void print_test()
 {
-	char x;
-	int y;
+	char x = 'a';
+	int y = 1;
 	char z[] = "Hello World!";
-	
-	printf("x: %c, %d, %X, %s\n", (char)x,(int)x, (char*)x);
-	printf("y: %c, %d, %X, %s\n", (char)y,(int)y, (char*)y);
-	printf("z: %c, %d, %X, %s\n", (char)z,(int)z, (char*)z);
-	
+
+	printf("x: %c\n", (char)x);
+	printf("y: %d\n", (int)y);
+	printf("z: %s\n", (char*)z);
+
 	char *xx = &x;
 	int *yy = &y;
-	char **zz = &z;
+	char *zz = z;
 
 
-	printf("xx: %c, %d, %X, %s\n", (char)xx,(int)xx, (char*)xx);
-	printf("yy: %c, %d, %X, %s\n", (char)yy,(int)yy, (char*)yy);
-	printf("zz: %c, %d, %X, %s\n", (char)zz,(int)zz, (char*)zz);
-
-} 
+	printf("xx: %c\n", (char)*xx);
+	printf("yy: %d\n", (int)*yy);
+	printf("zz: %s\n", (char*)zz);
+}
 
 void StackExpander_GDBTesting()
 {
@@ -118,13 +120,15 @@ void StackExpander_ValGrindTesting()
 	HyperEdge *hyper_edge = malloc_HyperEdge(10);
 	HyperGraph *hyper_graph = malloc_HyperGraph(10);
 
-
+	free_Odometer(odometer);
+	free_HyperEdge(hyper_edge);
+	free_HyperGraph(hyper_graph);
 }
 
 int main(int argc, char **argv)
 {
 	StackExpander_GDBTesting();
-	
+
 	StackExpander_ValGrindTesting();
 
 	return 0;

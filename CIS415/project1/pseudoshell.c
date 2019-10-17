@@ -56,7 +56,7 @@ struct linux_dirent
 /*--------------------------Function Definitions-----------------------------*/
 // My error handler that uses perror to give way more descriptive error
 // printouts
-int handleError(int res, const char *callname) 
+int handleError(int res, const char *callname)
 {
 	if (res == -1)
 	{
@@ -76,7 +76,7 @@ char * createAbsPath(const char *path)
 {
 	// Caller needs to free this
 	char *cwd = malloc(sizeof(char) * BUF_SIZE);
-	
+
 	// Just build the path... kinda self explanatory
 	cwd = getcwd(cwd, BUF_SIZE);
 	strcat(cwd, "/");
@@ -86,7 +86,7 @@ char * createAbsPath(const char *path)
 }
 
 // ls
-void listDir() 
+void listDir()
 {
 	char *buffer = malloc(sizeof(char) * BUF_SIZE);
 	int openat_res, write_res, getdents_res = 0;
@@ -103,7 +103,7 @@ void listDir()
 		return;
 	}
 
-	do 
+	do
 	{
 		// Make sure to check for errors at the start of every
 		// loop, it can't be -1 on the first loop so this is fine
@@ -124,20 +124,20 @@ void listDir()
 			d_type = *(buffer + bpos + d->d_reclen - 1);
 			write_res = syscall(SYS_write,
 				fileno(stdout),
-				strcat(d->d_name, " "), 
+				strcat(d->d_name, " "),
 				strlen(d->d_name) + 1);
 			handleError(write_res, "write");
 
 			bpos += d->d_reclen;
 		}
 	} while (getdents_res != 0);
-	
+
 	// Print the final newline and check for errors one last time
 	write_res = syscall(SYS_write, fileno(stdout), "\n", sizeof(char));
 	handleError(write_res, "write");
 
 	// Cleanup
-	free(buffer);
+	free(buffer); buffer = NULL;
 }
 
 // pwd
@@ -160,7 +160,7 @@ void showCurrentDir()
 	handleError(write_res, "write");
 
 	// Cleanup
-	free(cwd_buffer);
+	free(cwd_buffer); cwd_buffer = NULL;
 }
 
 // mkdir
@@ -197,7 +197,7 @@ void changeDir(char *dirName)
 	handleError(chdir_res, "chdir");
 
 	// Cleanup
-	free(cwd);
+	free(cwd); cwd = NULL;
 }
 
 // cp
@@ -219,14 +219,14 @@ void copyFile(char *sourcePath, char *destinationPath)
 	{
 		sourcePath_buffer = sourcePath;
 	}
-	
+
 	// This is hideously ugly. Gotta make the destination file, which means
 	// I need a full path to the file + the "/filename". So, I need to make
 	// a string of "/" and append the filename to it... but I need a buffer
 	// for "/" or else I won't have enough space to put the rest of the file.
 	// So we get this ugly stuff.
 	char *destination_filename = malloc(sizeof(char) * BUF_SIZE);
-	destination_filename[0] = '/'; 
+	destination_filename[0] = '/';
 	strcat(destination_filename, basename(sourcePath_buffer));
 	// Why did I have to do that? Memory management sucks sometimes.
 
@@ -267,14 +267,14 @@ void copyFile(char *sourcePath, char *destinationPath)
 	close(creat_res);
 
 	// Cleanup
-	free(destination_filename);
-	free(read_buffer);
-	free(sourcePath_buffer);
-	free(destPath_buffer);
+	free(destination_filename); destination_filename =  NULL;
+	free(read_buffer); read_buffer = NULL;
+	free(sourcePath_buffer); sourcePath_buffer = NULL;
+	free(destPath_buffer); destPath_buffer = NULL;
 }
 
 // mv
-void moveFile(char *sourcePath, char *destinationPath) 
+void moveFile(char *sourcePath, char *destinationPath)
 {
 	// All of this is same as copy basically
 	char *sourcePath_buffer = NULL;
@@ -290,7 +290,7 @@ void moveFile(char *sourcePath, char *destinationPath)
 	}
 
 	char *destination_filename = malloc(sizeof(char) * BUF_SIZE);
-	destination_filename[0] = '/'; 
+	destination_filename[0] = '/';
 	strcat(destination_filename, basename(sourcePath_buffer));
 
 	if (destinationPath[0] != '/')
@@ -310,11 +310,10 @@ void moveFile(char *sourcePath, char *destinationPath)
 	rename_res = syscall(SYS_rename, sourcePath_buffer, destPath_buffer);
 	handleError(rename_res, "rename");
 
-
 	// Cleanup
-	free(destination_filename);
-	free(sourcePath_buffer);
-	free(destPath_buffer);
+	free(destination_filename); destination_filename = NULL;
+	free(sourcePath_buffer); sourcePath_buffer = NULL;
+	free(destPath_buffer); destPath_buffer = NULL;
 }
 
 // rm
@@ -339,14 +338,14 @@ void deleteFile(char *filename)
 	handleError(unlink_res, "unlink");
 
 	// Cleanup
-	free(cwd);
+	free(cwd); cwd = NULL;
 }
 
 // cat
 void displayFile(char *filename)
 {
 	char *cat_buffer = malloc(sizeof(char) * READ_BUF_SIZE);
-	mode_t mode = (S_IRUSR | S_IRGRP | S_IROTH); 
+	mode_t mode = (S_IRUSR | S_IRGRP | S_IROTH);
 	int cat_res, open_res, write_res, cat_len = 0;
 
 	// Open the file, handle any errors
@@ -367,12 +366,12 @@ void displayFile(char *filename)
 	handleError(write_res, "write");
 
 	// Cleanup
-	free(cat_buffer);
+	free(cat_buffer); cat_buffer = NULL;
 	close(open_res);
 }
 
 // Wraps the functions that take one argument so that I can minimize
-// repeated code within main(). 
+// repeated code within main().
 void one_arg_wrapper(char *token, char *function)
 {
 	// Need the delimiter here as well, argcount keeps track
@@ -382,7 +381,7 @@ void one_arg_wrapper(char *token, char *function)
 	char *arg1 = malloc(sizeof(char) * BUF_SIZE);
 	int argcount, error = 0;
 
-	while (token != NULL && argcount <= 2)
+	while (token != NULL && argcount < 2)
 	{
 		if (argcount == 2)
 		{
@@ -431,11 +430,11 @@ void one_arg_wrapper(char *token, char *function)
 	}
 
 	// Cleanup
-	free(arg1);
+	free(arg1); arg1 = NULL;
 }
 
 // Wraps the functions that take two arguments so that I can minimize
-// repeated code within main(). 
+// repeated code within main().
 void two_arg_wrapper(char *token, char *function)
 {
 	// Need the delimiter here as well, argcount keeps track
@@ -446,7 +445,7 @@ void two_arg_wrapper(char *token, char *function)
 	char *arg2 = malloc(sizeof(char) * BUF_SIZE);
 	int argcount, error = 0;
 
-	while (token != NULL && argcount <= 4)
+	while (token != NULL && argcount < 4)
 	{
 		if (argcount == 4)
 		{
@@ -484,12 +483,21 @@ void two_arg_wrapper(char *token, char *function)
 		argcount++;
 	}
 
+	fprintf(stderr, "%s - %s\n", arg1, arg2);
+
 	if (!error)
 	{
 		// Handle all the function calls
 		if (strcmp(function, "cp") == 0 )
 		{
-			copyFile(arg1, arg2);
+			if (param1 != NULL && param2 != NULL)
+			{
+				copyFile(param1, param2);
+			}
+			else
+			{
+				// err
+			}
 		}
 		else if (strcmp(function, "mv") == 0)
 		{
@@ -498,19 +506,19 @@ void two_arg_wrapper(char *token, char *function)
 	}
 
 	// Cleanup
-	free(arg1);
-	free(arg2);
+	free(arg1); arg1 = NULL;
+	free(arg2); arg2 = NULL;
 }
 /*---------------------------------------------------------------------------*/
 
 /*-----------------------------Program Main----------------------------------*/
-int main(int argc, char *argv[]) 
+int main(int argc, char *argv[])
 {
 	setbuf(stdout, NULL);
 
 	// Delimiter & token pointer to be used by strotok()
 	const char *delimiter = " \t\n\f\r\v";
-	char *token;
+	char *token, command, param1, param2;
 
 	// The in / out streams used for writing, by default going
 	// to be stdin and stdout
@@ -519,14 +527,14 @@ int main(int argc, char *argv[])
 	int changed = 0;
 
 	// The variables used for getline() calls
-	char *line  = 0;
-	size_t len  = 0;
-	ssize_t nread;
+	char *line    = 0;
+	size_t len    = 0;
+	ssize_t nread = 0;
 
 	// Setting up the streams and flags for the shell
 	instream  = stdin;
 	outstream = stdout;
-	if (argc > 1) 
+	if (argc > 1)
 	{
 		// If we got multiple args then it's filemode...
 		if (argc > 2)
@@ -538,7 +546,7 @@ int main(int argc, char *argv[])
 				changed = 1;
 
 				// Check to see if the streams we were given are okay
-				if (instream == NULL || outstream == NULL) 
+				if (instream == NULL || outstream == NULL)
 				{
 					perror("fopen");
 					exit(EXIT_FAILURE);
@@ -566,16 +574,22 @@ int main(int argc, char *argv[])
 	}
 
 	// Main run loop
-	while ((!changed ? printf(">>> ") : 1) 
-		&& (nread = getline(&line, &len, instream)) != -1) 
+	while ((!changed ? printf(">>> ") : 1)
+		&& (nread = getline(&line, &len, instream)) != -1)
 	{
 		// Tokenize the input string
 		token = strtok(line, delimiter);
 
-		// Exit successfully if we get an exit command
-		if (token != NULL) 
+		// check if token is a command here else continue
+		if (checkCommand(token) == 0)
 		{
-			if (strcmp(token, "exit") == 0) 
+			fprintf(stderr, "err\n");
+		}
+
+		// Exit successfully if we get an exit command
+		if (token != NULL)
+		{
+			if (strcmp(token, "exit") == 0)
 			{
 				fprintf(outstream, "\n");
 				break;
@@ -589,8 +603,39 @@ int main(int argc, char *argv[])
 
 		// Given output has a newline before displaying the tokens
 		printf("\n");
-		while (token != NULL) 
+		while (token != NULL)
 		{
+			token = strtok(NULL, delimiter);
+			if (checkCommand(token) == 1)
+			{
+				fprintf(stdout, "err\n");
+			}
+			else if (checkControl(token) == 1)
+			{
+				callFunction(command, NULL, NULL);
+				break;
+			}
+			else
+			{
+				strcpy(param1, token);
+				token = strtok(NULL, delimiter);
+				if (checkCommand(token) == 1)
+				{
+					fprintf(stdout, "err\n");
+				}
+				else if (checkControl(token) == 1)
+				{
+					callFunction(command, param1, NULL);
+					break;
+				}
+				else
+				{
+					strcpy(param2, token);
+					callFunction(command, param1, param2);
+					break;
+				}
+			}
+
 			// Carry on if we get a semicolon in the wild
 			if (strcmp(token, ";") == 0)
 			{
@@ -601,11 +646,20 @@ int main(int argc, char *argv[])
 			// Handle "ls"
 			else if (strcmp(token, "ls") == 0)
 			{
-				listDir();
+				token = strtok(NULL, delimiter);
+				if ((strcmp(token, ";") != 0) || token != NULL)
+				{
+					fprintf(stdout, "err\n");
+					continue;
+				}
+				else
+				{
+					listDir();
+				}
 			}
 
 			// Handle "pwd"
-			else if (strcmp(token, "pwd") == 0) 
+			else if (strcmp(token, "pwd") == 0)
 			{
 				showCurrentDir();
 			}
@@ -651,14 +705,17 @@ int main(int argc, char *argv[])
 			{
 				fprintf(stderr, "Unrecognized command: %s\n", token);
 			}
-			
+
 			// Clean up
 			token = strtok(NULL, delimiter);
 		}
 	}
-	
+
 	// Cleanup
-	free(line);
+	free(line); line = NULL;
+	free(command); command = NULL;
+	free(param1); param1 = NULL;
+	free(param2); param2 = NULL;
 	if (changed)
 	{
 		fclose(instream);
