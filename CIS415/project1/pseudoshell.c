@@ -62,6 +62,7 @@ int handleError(int res, const char *callname)
 	{
 		// Get the errno so I can reference the documentation
 		fprintf(stderr, "Error in %s; errno is %d.\n", callname, errno);
+		perror(callname);
 
 		return -1;
 	}
@@ -83,6 +84,16 @@ char * createAbsPath(const char *path)
 	return cwd;
 }
 
+// Free function to be used by every function for when they
+// need to exit early / for cleanup
+void freeStuff(void *ptr1, void *ptr2, void *ptr3, void *ptr4)
+{
+	free(ptr1); ptr1 = NULL;
+	free(ptr2); ptr2 = NULL;
+	free(ptr3); ptr3 = NULL;
+	free(ptr4); ptr4 = NULL;
+}
+
 // ls
 void listDir()
 {
@@ -95,9 +106,9 @@ void listDir()
 	openat_res = syscall(SYS_openat, AT_FDCWD, ".", O_DIRECTORY);
 
 	// Handle openat errors if there are any and prematurely exit
-	if ((handleError(openat_res, "openat")) == -1)
+	if (handleError(openat_res, "openat") == -1)
 	{
-		free(buffer);
+		freeStuff(buffer, NULL, NULL, NULL);
 		return;
 	}
 
@@ -107,7 +118,8 @@ void listDir()
 		// loop, it can't be -1 on the first loop so this is fine
 		if (handleError(getdents_res, "getdents") == -1)
 		{
-			break;
+			freeStuff(buffer, NULL, NULL, NULL);
+			return;
 		}
 
 		// Scan the filepath for files
@@ -132,10 +144,14 @@ void listDir()
 
 	// Print the final newline and check for errors one last time
 	write_res = syscall(SYS_write, fileno(stdout), "\n", sizeof(char));
-	handleError(write_res, "write");
+	if (handleError(write_res, "write") == -1)
+	{
+		freeStuff(buffer, NULL, NULL, NULL);
+		return;
+	}
 
 	// Cleanup
-	free(buffer); buffer = NULL;
+	freeStuff(buffer, NULL, NULL, NULL);
 }
 
 // pwd
@@ -147,7 +163,11 @@ void showCurrentDir()
 	// Get the string that is the current directory name and
 	// handle its errors
 	getcwd_res = syscall(SYS_getcwd, cwd_buffer, BUF_SIZE);
-	handleError(getcwd_res, "getcwd");
+	if (handleError(getcwd_res, "getcwd") == -1)
+	{
+		freeStuff(cwd_buffer, NULL, NULL, NULL);
+		return;
+	}
 
 	// Create the writeable string
 	cwd_len = strlen(cwd_buffer);
@@ -155,16 +175,20 @@ void showCurrentDir()
 
 	// Write it out to the file and handle its errors
 	write_res = syscall(SYS_write, fileno(stdout), cwd_buffer, cwd_len + 1);
-	handleError(write_res, "write");
+	if (handleError(write_res, "write") == -1)
+	{
+		freeStuff(cwd_buffer, NULL, NULL, NULL);
+		return;
+	}
 
 	// Cleanup
-	free(cwd_buffer); cwd_buffer = NULL;
+	freeStuff(cwd_buffer, NULL, NULL, NULL);
 }
 
 // mkdir
 void makeDir(char *dirName)
 {
-	mode_t mode = (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IROTH);
+	mode_t mode = (S_IRWXU | S_IRWXG | S_IRWXO);
 	int mkdir_res = 0;
 
 	// Create a folder with a mode that allows all users to read to it
@@ -195,7 +219,7 @@ void changeDir(char *dirName)
 	handleError(chdir_res, "chdir");
 
 	// Cleanup
-	free(cwd); cwd = NULL;
+	freeStuff(cwd, NULL, NULL, NULL);
 }
 
 // cp
@@ -242,33 +266,48 @@ void copyFile(char *sourcePath, char *destinationPath)
 	destPath_buffer = strcat(destPath_buffer, destination_filename);
 
 	// Normal stuff from other functions
-	mode_t read_mode = (S_IRUSR | S_IRGRP | S_IROTH);
-	mode_t write_mode = (S_IWUSR | S_IWGRP | S_IWOTH) | read_mode;
+	mode_t mode = 0666;
 	int open_res, read_res, write_res, creat_res, read_len = 0;
 
 	// Open the source file, handle any errors
-	open_res = syscall(SYS_open, sourcePath_buffer, O_RDONLY, read_mode);
-	handleError(open_res, "open");
+	open_res = syscall(SYS_open, sourcePath_buffer, O_RDWR, mode);
+	if (handleError(open_res, "open") == -1)
+	{
+		freeStuff(read_buffer, sourcePath_buffer, destPath_buffer, destination_filename);
+	}
 
 	// Read the source file into the buffer
 	read_res = syscall(SYS_read, open_res, read_buffer, READ_BUF_SIZE);
-	handleError(read_res, "read");
+	// Handle errors if there are any
+	if (handleError(read_res, "rename") == -1)
+	{
+		freeStuff(read_buffer, sourcePath_buffer, destPath_buffer, destination_filename);
+		close(open_res);
+		return;
+	}
 	close(open_res);
 
 	// Open the destination file
-	creat_res = syscall(SYS_creat, destPath_buffer, write_mode);
-	handleError(creat_res, "creat");
+	open_res = syscall(SYS_open, destPath_buffer, (O_CREAT | O_RDWR), mode);
+	// Handle errors if there are any
+	if (handleError(open_res, "open") == -1)
+	{
+		freeStuff(read_buffer, sourcePath_buffer, destPath_buffer, destination_filename);
+		return;
+	}
 
 	// Write the file into the source destination
-	write_res = syscall(SYS_write, creat_res, read_buffer, strlen(read_buffer));
-	handleError(write_res, "write");
-	close(creat_res);
+	write_res = syscall(SYS_write, open_res, read_buffer, strlen(read_buffer));
+	// Handle errors if there are any
+	if (handleError(write_res, "write") == -1)
+	{
+		freeStuff(read_buffer, sourcePath_buffer, destPath_buffer, destination_filename);
+		return;
+	}
+	close(open_res);
 
 	// Cleanup
-	free(destination_filename); destination_filename =  NULL;
-	free(read_buffer); read_buffer = NULL;
-	free(sourcePath_buffer); sourcePath_buffer = NULL;
-	free(destPath_buffer); destPath_buffer = NULL;
+	freeStuff(read_buffer, sourcePath_buffer, destPath_buffer, destination_filename);
 }
 
 // mv
@@ -277,7 +316,9 @@ void moveFile(char *sourcePath, char *destinationPath)
 	// All of this is same as copy basically
 	char *sourcePath_buffer = NULL;
 	char *destPath_buffer = NULL;
+	int rename_res, getcwd_res = 0;
 
+	// Always use abs path of source
 	if (sourcePath[0] != '/')
 	{
 		sourcePath_buffer = createAbsPath(sourcePath);
@@ -287,31 +328,40 @@ void moveFile(char *sourcePath, char *destinationPath)
 		sourcePath_buffer = sourcePath;
 	}
 
-	char *destination_filename = malloc(sizeof(char) * BUF_SIZE);
-	destination_filename[0] = '/';
-	strcat(destination_filename, basename(sourcePath_buffer));
-
 	if (destinationPath[0] != '/')
 	{
 		destPath_buffer = createAbsPath(destinationPath);
 	}
+	// If we got ".", just use the current directory
+	else if (strcmp(destinationPath, ".") == 0)
+	{
+		getcwd_res = syscall(SYS_getcwd, destPath_buffer, BUF_SIZE);
+	}
+	// Otherwise we got a full path, use it
 	else
 	{
 		destPath_buffer = destinationPath;
 	}
-	destPath_buffer = strcat(destPath_buffer, destination_filename);
 
-	int rename_res = 0;
+	// Handle errors if there are any
+	if (handleError(getcwd_res, "getcwd") == -1)
+	{
+		freeStuff(sourcePath_buffer, destPath_buffer, NULL, NULL);
+		return;
+	}
 
 	// Rename will actually move a file directories if it needs to...
 	// ... good thing I did all the work up there to get full pathnames
 	rename_res = syscall(SYS_rename, sourcePath_buffer, destPath_buffer);
-	handleError(rename_res, "rename");
+	// Handle errors if there are any
+	if (handleError(rename_res, "rename") == -1)
+	{
+		freeStuff(sourcePath_buffer, destPath_buffer, NULL, NULL);
+		return;
+	}
 
 	// Cleanup
-	free(destination_filename); destination_filename = NULL;
-	free(sourcePath_buffer); sourcePath_buffer = NULL;
-	free(destPath_buffer); destPath_buffer = NULL;
+	freeStuff(sourcePath_buffer, destPath_buffer, NULL, NULL);
 }
 
 // rm
@@ -336,7 +386,7 @@ void deleteFile(char *filename)
 	handleError(unlink_res, "unlink");
 
 	// Cleanup
-	free(cwd); cwd = NULL;
+	freeStuff(cwd, NULL, NULL, NULL);
 }
 
 // cat
@@ -348,12 +398,20 @@ void displayFile(char *filename)
 
 	// Open the file, handle any errors
 	open_res = syscall(SYS_open, filename, O_RDONLY, mode);
-	handleError(open_res, "open");
+	if (handleError(open_res, "open") == -1)
+	{
+		freeStuff(cat_buffer, NULL, NULL, NULL);
+		return;
+	}
 
 	// Read the file into the buffer for printing, handle any
 	// errors
 	cat_res = syscall(SYS_read, open_res, cat_buffer, READ_BUF_SIZE);
-	handleError(cat_res, "read");
+	if (handleError(cat_res, "read") == -1)
+	{
+		freeStuff(cat_buffer, NULL, NULL, NULL);
+		return;
+	}
 
 	// Make the string writeable
 	cat_len = strlen(cat_buffer);
@@ -361,10 +419,14 @@ void displayFile(char *filename)
 
 	// Create the writeable string and write it out, handle any errors
 	write_res = syscall(SYS_write, fileno(stdout), cat_buffer, cat_len + 1);
-	handleError(write_res, "write");
+	if (handleError(write_res, "write") == -1)
+	{
+		freeStuff(cat_buffer, NULL, NULL, NULL);
+		return;
+	}
 
 	// Cleanup
-	free(cat_buffer); cat_buffer = NULL;
+	freeStuff(cat_buffer, NULL, NULL, NULL);
 	close(open_res);
 }
 
@@ -597,14 +659,14 @@ int main(int argc, char *argv[])
 		// Tokenize the input string
 		token = strtok(line, delimiter);
 
+		label1:
 		// check if token is a command here else continue
 		if (checkCommand(token))
 		{
 			strcpy(command, token);
-			printf("command is now: %s\n", command);
 		}
 		else
-		{			
+		{
 			fprintf(stdout, "Error: unrecognized command.\n");
 			continue;
 		}
@@ -661,6 +723,12 @@ int main(int argc, char *argv[])
 				}
 			}
 		}
+
+		token = strtok(NULL, delimiter);
+		if (checkCommand(token))
+		{
+			goto label1;
+		}
 	}
 
 	// Cleanup
@@ -671,7 +739,6 @@ int main(int argc, char *argv[])
 	if (changed)
 	{
 		fclose(instream);
-		system("perl -pi -e 'chomp if eof' pseudoshell_output.txt");
 		fclose(outstream);
 	}
 
