@@ -1,0 +1,12 @@
+total 60
+ 0 pseudoshell_output.txt
+ 4 part2.c
+ 4 part1.c
+20 part1
+ 4 iobound.c
+12 iobound
+ 0 input
+ 4 cpubound.c
+12 cpubound
+ 0 ..
+ 0 .
