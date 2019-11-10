@@ -22,13 +22,14 @@
 #include <wait.h>
 
 // Some constants used in various functions
-#define AT_FDCWD -100
 #define BUF_SIZE 1024
-#define READ_BUF_SIZE 1048576
+
+pid_t pids[BUF_SIZE];
 
 void cleanParams(char **params)
 {
-	for (int i=0; i<BUF_SIZE; ++i) { params[i] = NULL; }
+	int i;
+	for (i=0; i<BUF_SIZE; ++i) { params[i] = NULL; }
 }
 
 void mainCleaner(char *command, char** params)
@@ -43,12 +44,14 @@ int main(int argc, char *argv[])
 {
 	setbuf(stdout, NULL);
 
-	// Delimiter & token pointer to be used by strtok()
+	// Delimiter & token pointer to be used by strtok(), as well
+	// as other string stuff we read in with getline()
 	const char *delimiter = " \t\n\f\r\v";
 	char *token;
 	char *command = malloc(sizeof(char) * BUF_SIZE);
 	char **params = malloc(sizeof(char *) * BUF_SIZE);
-	for (int j=0; j<BUF_SIZE; ++j) { params[j] = NULL; }
+	int j;
+	for (j=0; j<BUF_SIZE; ++j) { params[j] = NULL; }
 	int i = 1;
 
 	// The in / out streams used for writing, by default going
@@ -63,35 +66,33 @@ int main(int argc, char *argv[])
 	ssize_t nread = 0;
 
 	// Fork and process stuff
-	pid_t pid;
-	int error, count = 0;
-	int status;
+	int error, count, status = 0;
 
-	// Setting up the streams and making sure we got a flag
+	// Setting up the streams and making sure we got an input file
 	instream  = stdin;
 	outstream = stdout;
 	if (argc > 1)
 	{
 		instream = fopen(argv[1], "r");
-		freopen("pseudoshell_output.txt", "w", stdout);
 		changed = 1;
 
 		// Check to see if the streams we were given are okay
 		if (instream == NULL || outstream == NULL)
 		{
 			perror("fopen");
+			mainCleaner(command, params);
 			exit(EXIT_FAILURE);
 		}
 	}
 	else
 	{
 		fprintf(stderr, "No correct file given.\n");
+		mainCleaner(command, params);
 		exit(EXIT_FAILURE);
 	}
 
 	// Main run loop
-	while ((!changed ? printf(">>> ") : 1)
-		&& (nread = getline(&line, &len, instream)) != -1)
+	while ((nread = getline(&line, &len, instream)) != -1)
 	{
 		// Tokenize the input string
 		token = strtok(line, delimiter);
@@ -106,44 +107,44 @@ int main(int argc, char *argv[])
 		command = token;
 		params[0] = token;
 		// ... now parse all of its arguments
-		fprintf(stderr, "Params: %s ", params[0]);
 		while (token != NULL)
 		{
 			token = strtok(NULL, delimiter);
 			params[i] = token;
-			fprintf(stderr, "%s ", params[i]);
 			i++;
 		}
 
-		fprintf(stderr, "(command is %s)\n", command);
-
-		pid = fork();
-		if (pid < 0)
+		// Start the process
+		pids[count] = fork();
+		if (pids[count] < 0)
 		{
 			perror("fork");
 			mainCleaner(command, params);
 			exit(EXIT_FAILURE);
 		}
-		if (pid == 0)
+		// For the child process to execvp()
+		if (pids[count] == 0)
 		{
 			error = execvp(command, params);
 
+			// Cleanup if we messed up
 			mainCleaner(command, params);
 			perror("execvp");
 			exit(EXIT_FAILURE);
 		}
+		count++;
 
 		// Clean up my stuff to set up for next command and
 		// its params
 		command = NULL;
 		cleanParams(params);
 		i = 1;
-		count++;
 	}
 
-	for (int j=0; j<count; ++j)
+	// Wait for children to finish
+	for (j=0; j<count; ++j)
 	{
-		waitpid(pid, &status, 0);
+		waitpid(pids[j], &status, 0);
 	}
 
 	// Cleanup

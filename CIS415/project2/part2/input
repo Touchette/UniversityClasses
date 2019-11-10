@@ -1,2 +1,3 @@
 ls -a -r -s
 sleep 1
+./cpubound -minutes 1
