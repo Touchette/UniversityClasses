@@ -1,20 +1,124 @@
 /*
- * Description: This part builds on the project by adding an actual
- *		scheduler. It will schedule in a round-robin manner by using
- *		a signal handler, and each process is given a time quantum of
- *		1 second. This can be changed by changing the alarm(1) call in
- *		main() along with its accompanying sleep(1001) call.
- *
+ * Description: This version of the project builds on previous versions
+ *		by instead of printing meaningless stop/start/cont signal
+ *		information, it instead prints a bunch of useful process
+ *		info every time a signal is caught.
  *
  * Author: Natalie Letz #951463883
  *
- * Date: 2019-11-09
+ * Date: 2019-11-10
  *
- * Notes: I'm not 100% sure if this works properly, but it sure looks
- *	like it to me from the output.
+ * Notes: prettyPrinter() does not print in a table. I don't know how to
+ *		do that nor do I have the time to figure out (it's 7:31PM on the
+ *		night of submission.)
  */
 
-#include "part3.h"
+#include "part4.h"
+
+// From StackOverflow question #15515088
+int stringStartsWith(const char *a, const char *b)
+{
+	if (strncmp(a, b, strlen(b)) == 0)
+		return 1;
+	else
+		return 0;
+}
+
+// Function that will print a pretty version of a bunch of
+// process info like top() would, but not quite as nice...
+// I don't know how to do table printing
+void prettyPrinter()
+{
+	// Variables for so much stuff... getline, for loops, other loops,
+	// fread, fopen, strcat, strlen...
+	int i, pidLen, fd;
+	FILE *instream;
+	char *line = 0;
+	size_t len = 0;
+	ssize_t nread = 0;
+	char buffer[BUF_SIZE * 10];
+	char pid[7]; sprintf(pid, "%d", (int) pids[idx]);
+	pidLen = strlen(pid);
+	char *procBuf = "/proc/";
+
+	// Every path starts with /proc/[pid]
+	char procPath[strlen(procBuf) + pidLen + 1];
+	strcpy(procPath, procBuf); strcat(procPath, pid);
+
+	// Print i/o info (and the header)
+	char ioPath[strlen(procPath) + strlen("/io")];
+	strcpy(ioPath, procPath); strcat(ioPath, "/io");
+
+	instream = fopen(ioPath, "r");
+
+	if (instream != NULL)
+	{
+		// Print |-~-~-~-~-~-~-~-~ PID xxxxxx -~-~-~-~-~-~-~-~|
+		printf("\n");
+		char *initString = "|-~-~-~-~-~-~-~-~ PID ";
+		char *endString = "-~-~-~-~-~-~-~-~-~|";
+		char initAndPid[strlen(initString) + pidLen + 1];
+		strcpy(initAndPid, initString); strcat(initAndPid, pid);
+		printf("%s %s\n", initAndPid, endString);
+
+		// Print I/O info
+		printf("%s\n", ioPath);
+		fread(buffer, sizeof(char), BUF_SIZE * 10, instream);
+		printf("%s\n", buffer);
+		memset(buffer, 0, sizeof(buffer));
+		fclose(instream);
+	}
+	else
+		return;
+
+	// Print status info
+	char statusPath[strlen(procPath) + strlen("/status")];
+	strcpy(statusPath, procPath); strcat(statusPath, "/status");
+
+	instream = fopen(statusPath, "r");
+
+	if (instream != NULL)
+	{
+		printf("%s\n", statusPath);
+		while (nread = getline(&line, &len, instream) != -1)
+		{
+			if (stringStartsWith(line, "VmPeak"))
+				printf("%s\n", strtok(line, "\n"));
+			else if (stringStartsWith(line, "Name"))
+				printf("%s\n", strtok(line, "\n"));
+			else if (stringStartsWith(line, "State"))
+				printf("%s\n", strtok(line, "\n"));
+			else if (stringStartsWith(line, "VmData"))
+				printf("%s\n", strtok(line, "\n"));
+			else if (stringStartsWith(line, "Threads"))
+				printf("%s\n", strtok(line, "\n"));
+			else
+				continue;
+		}
+		printf("\n");
+	}
+	else
+		return;
+
+	// Print syscall info
+	char syscallPath[strlen(procPath) + strlen("/syscall")];
+	strcpy(syscallPath, procPath); strcat(syscallPath, "/syscall");
+
+	instream = fopen(syscallPath, "r");
+
+	if (instream != NULL)
+	{
+		// Print I/O info
+		printf("%s\n", syscallPath);
+		fread(buffer, sizeof(char), BUF_SIZE * 10, instream);
+		printf("%s\n", buffer);
+		memset(buffer, 0, sizeof(buffer));
+		fclose(instream);
+		printf("|-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~|\nOutput (if any):\n");
+	}
+	else
+		return;
+}
 
 // Just checks if a process has exited or not for the signal handler
 int checkProcessStatus(pid_t pid)
@@ -44,15 +148,12 @@ void sigalrm(int signal)
 	if (totalRunningProc == 0)
 		return;
 
-	fprintf(stdout, "Parent PID%d: caught alarm.\n", getpid());
-
 	// Start handling the signal...
 	// ... by stopping the current running process
 	while (pids[idx] != 0)
 	{
 		if (checkProcessStatus(pids[idx]) == 0)
 		{
-			printf("Parent PID%d: sending stop to %d.\n", getpid(), pids[idx]);
 			kill(pids[idx], SIGSTOP);
 			idx++;
 			break;
@@ -67,12 +168,11 @@ void sigalrm(int signal)
 	if (idx >= totalProcCount)
 		idx = 0;
 
-	// ... start the next process to be run.
+	// ... start the next process to be run...
 	while (pids[idx] != 0)
 	{
 		if (checkProcessStatus(pids[idx]) == 0)
 		{
-			printf("Parent PID%d: sending cont to %d.\n", getpid(), pids[idx]);
 			kill(pids[idx], SIGCONT);
 			break;
 		}
@@ -82,6 +182,9 @@ void sigalrm(int signal)
 		}
 	}
 
+	// ... print process information
+	if (pids[idx] != 0)
+		prettyPrinter();
 }
 
 // This signal is thrown when children exit, so it's used to decrement
@@ -233,7 +336,6 @@ int main(int argc, char *argv[])
 				nanosleep(&tim1, &tim2);
 			}
 
-			fprintf(stdout, "Child PID%d: received SIGUSR1, calling exec.\n", getpid());
 			error = execvp(command, params);
 
 			// Cleanup if we messed up
@@ -250,19 +352,15 @@ int main(int argc, char *argv[])
 		i = 1;
 	}
 
-	fprintf(stdout, "Parent PID%d: sending SIGUSR1 signals.\n", getpid());
 	// Send the SIGUSR1 signals...
 	for (j=0; j<count; ++j)
 	{
-		fprintf(stdout, "Child PID%d: receiving SIGUSR1\n", pids[j]);
 		kill(pids[j], SIGUSR1);
 	}
 
-	fprintf(stdout, "Parent PID%d: sending SIGSTOP signals to all but one.\n", getpid());
 	// ... the SIGSTOP signals to all but first process
 	for (j=1; j<count; ++j)
 	{
-		fprintf(stdout, "Child PID%d: receiving SIGSTOP\n", pids[j]);
 		kill(pids[j], SIGSTOP);
 	}
 

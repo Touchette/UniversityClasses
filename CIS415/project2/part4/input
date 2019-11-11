@@ -1,0 +1,5 @@
+ls -a -r -s
+sleep 4
+./cpubound -minutes 1
+ls -a -r -s
+cat input

@@ -1,5 +1,7 @@
 /*
- * Description:
+ * Description: This part builds on part1 by adding the abiloity
+ *		to stop and resume processes with signals, but no new
+ *		signal handlers of my own
  *
  * Author: Natalie Letz #951463883
  *
@@ -8,26 +10,7 @@
  * Notes:
  */
 
-#include <sys/syscall.h>
-#include <sys/types.h>
-#include <libgen.h>
-#include <signal.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <signal.h>
-#include <dirent.h>
-#include <stdio.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <wait.h>
-#include <time.h>
-
-// Some constants used in various functions
-#define BUF_SIZE 1024
-
-pid_t pids[BUF_SIZE];
-int run = 0;
+#include "part2.h"
 
 // Our run signal! Cute huh?
 void sigusr1(int signal)
@@ -35,12 +18,14 @@ void sigusr1(int signal)
 	run = 1;
 }
 
+// Used in main to clear up the params before each new command is read in
 void cleanParams(char **params)
 {
 	int i;
 	for (i=0; i<BUF_SIZE; ++i) { params[i] = NULL; }
 }
 
+// Cleans up the stuff in main()
 void mainCleaner(char *command, char** params)
 {
 	free(command); command = NULL;
