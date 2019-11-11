@@ -1,2 +1,2 @@
-part2: part2.c part2.h
-	gcc -o part2 part2.c -I.
+part2: part2.c header.h
+	gcc -o part2.exe part2.c -I.

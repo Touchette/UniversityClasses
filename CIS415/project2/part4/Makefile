@@ -1,2 +1,2 @@
-part4: part4.c part4.h
-	gcc -o part4 part4.c -I.
+part4: part4.c header.h
+	gcc -o part4.exe part4.c -I.

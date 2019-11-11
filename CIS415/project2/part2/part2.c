@@ -10,7 +10,7 @@
  * Notes:
  */
 
-#include "part2.h"
+#include "header.h"
 
 // Our run signal! Cute huh?
 void sigusr1(int signal)

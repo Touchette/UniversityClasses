@@ -14,7 +14,7 @@
  *	like it to me from the output.
  */
 
-#include "part3.h"
+#include "header.h"
 
 // Just checks if a process has exited or not for the signal handler
 int checkProcessStatus(pid_t pid)

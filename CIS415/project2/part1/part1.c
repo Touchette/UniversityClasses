@@ -9,7 +9,7 @@
  * Notes:
  */
 
-#include "part1.h"
+#include "header.h"
 
 // Used in main to clear up the params before each new command is read in
 void cleanParams(char **params)

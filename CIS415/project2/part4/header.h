@@ -1,5 +1,5 @@
-#ifndef PART3_H
-#define PART3_H
+#ifndef HEADER_H
+#define HEADER_H
 
 #include <sys/syscall.h>
 #include <libgen.h>
@@ -20,6 +20,9 @@ pid_t pids[BUF_SIZE] = { 0 };
 int totalProcCount, totalRunningProc = 0;
 int run, idx = 0;
 
+// Part 4 Functions
+int stringStartsWith(const char *a, const char *b);
+void prettyPrinter();
 
 // Part 3 Functions
 int checkProcessStatus(pid_t pid);

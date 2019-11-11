@@ -1,5 +1,5 @@
-#ifndef PART2_H
-#define PART2_H
+#ifndef HEADER_H
+#define HEADER_H
 
 #include <sys/syscall.h>
 #include <libgen.h>
@@ -17,8 +17,6 @@
 #define BUF_SIZE 1024
 
 pid_t pids[BUF_SIZE] = { 0 };
-int run = 0;
-
 
 // Part 1 & 2 Functions
 void cleanParams(char **params);

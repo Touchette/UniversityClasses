@@ -1,5 +1,5 @@
-#ifndef PART1_H
-#define PART1_H
+#ifndef HEADER_H
+#define HEADER_H
 
 #include <sys/syscall.h>
 #include <libgen.h>
@@ -17,6 +17,15 @@
 #define BUF_SIZE 1024
 
 pid_t pids[BUF_SIZE] = { 0 };
+int totalProcCount, totalRunningProc = 0;
+int run, idx = 0;
+
+
+// Part 3 Functions
+int checkProcessStatus(pid_t pid);
+void sigusr1(int signal);
+void sigalrm(int signal);
+void sigchld(int signal);
 
 // Part 1 & 2 Functions
 void cleanParams(char **params);
