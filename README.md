@@ -17,9 +17,9 @@ uploaded follows.
 # 2019
 * Winter 2019 - Introduction to Computer Graphics - Professor Hank Childs
 ***
-* Spring 2019 - Introduction to Game Programming - Professor Eric Childs
+* Spring 2019 - Introduction to Game Programming - Professor Eric Wills
 ***
 * Fall 2019 - Operating Systems - Professor Allen Malony
 # 2020
-* Winter 2020 - Computer Architecture - Professor Eric Wills
+* Winter 2020 - Computer Architecture - Professor Allen Malony
 * Winter 2020 - Scientific Visualization - Professor Hank Childs
