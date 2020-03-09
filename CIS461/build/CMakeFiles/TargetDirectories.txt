@@ -1,0 +1,3 @@
+/home/nataliee/Documents/Repos/UniversityClasses/CIS461/build/CMakeFiles/rebuild_cache.dir
+/home/nataliee/Documents/Repos/UniversityClasses/CIS461/build/CMakeFiles/qcc.dir
+/home/nataliee/Documents/Repos/UniversityClasses/CIS461/build/CMakeFiles/edit_cache.dir

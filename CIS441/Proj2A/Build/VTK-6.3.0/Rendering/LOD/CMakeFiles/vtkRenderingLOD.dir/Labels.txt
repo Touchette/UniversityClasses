@@ -1,8 +1,0 @@
-# Target labels
- vtkRenderingLOD
-# Source files and their labels
-/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Rendering/LOD/vtkLODActor.cxx
-/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Rendering/LOD/vtkQuadricLODActor.cxx
-/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Rendering/LOD/vtkLODActor.h
-/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Rendering/LOD/vtkQuadricLODActor.h
-/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Rendering/LOD/vtkRenderingLODModule.h

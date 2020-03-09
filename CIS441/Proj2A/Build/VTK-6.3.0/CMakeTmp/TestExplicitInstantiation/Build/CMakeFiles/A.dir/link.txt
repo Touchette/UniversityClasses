@@ -1,2 +1,0 @@
-/usr/bin/ar qc libA.a  CMakeFiles/A.dir/A.cxx.o
-/usr/bin/ranlib libA.a

@@ -1,6 +1,0 @@
-# Target labels
- vtkDICOMParser
-# Source files and their labels
-/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Utilities/DICOMParser/DICOMFile.cxx
-/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Utilities/DICOMParser/DICOMParser.cxx
-/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Utilities/DICOMParser/DICOMAppHelper.cxx

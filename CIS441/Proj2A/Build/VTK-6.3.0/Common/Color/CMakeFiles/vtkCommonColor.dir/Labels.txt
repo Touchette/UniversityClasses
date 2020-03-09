@@ -1,8 +1,0 @@
-# Target labels
- vtkCommonColor
-# Source files and their labels
-/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Common/Color/vtkColorSeries.cxx
-/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Common/Color/vtkNamedColors.cxx
-/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Common/Color/vtkColorSeries.h
-/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Common/Color/vtkNamedColors.h
-/home/natalie/Documents/Repos/UniversityClasses/CIS441/Proj2A/Build/VTK-6.3.0/Common/Color/vtkCommonColorModule.h
